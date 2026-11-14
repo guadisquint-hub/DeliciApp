@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeliciApp - Delicias Artesanales</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./logo.jpg" />
+  <meta name="theme-color" content="#C85A17" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            crema: '#FFFDF7',
+            manteca: '#FDF3D7',
+            terracota: '#C85A17',
+            cobre: '#A8430D',
+            chocolate: '#3E2723',
+            canela: '#6D4C41'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #FFFDF7; color: #3E2723; font-family: system-ui, -apple-system, sans-serif; }
+    .gingham-bg {
+      background-color: #FFF9E6;
+      background-image: linear-gradient(90deg, rgba(246, 200, 95, 0.18) 50%, transparent 50%),
+                        linear-gradient(rgba(246, 200, 95, 0.18) 50%, transparent 50%);
+      background-size: 24px 24px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- PANTALLA DE LOGIN -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4 gingham-bg">
+    <div class="bg-white border-2 border-amber-200 rounded-2xl shadow-xl max-w-md w-full p-6 sm:p-8">
+      <div class="flex flex-col items-center mb-6">
+        <img src="./logo.jpg" alt="Delicias Artesanales" class="w-36 h-36 object-contain rounded-full shadow-md border-4 border-amber-100 mb-3" />
+        <h1 class="text-2xl font-extrabold text-chocolate">DeliciApp</h1>
+        <p class="text-sm text-canela">Sistema de Cantina & Punto de Venta</p>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-canela mb-1">Seleccionar Caja / Puesto</label>
+          <select id="login-caja" class="w-full border-2 border-amber-200 rounded-xl px-3 py-2.5 bg-crema font-semibold focus:outline-none focus:border-terracota">
+            <option value="Caja 1">Caja 1 (Mostrador Principal)</option>
+            <option value="Caja 2">Caja 2 (Apoyo / Rápida)</option>
+            <option value="Caja 3">Caja 3 (Eventos / Patio)</option>
+            <option value="Administración">Administración Central</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-canela mb-1">Usuario (Correo)</label>
+          <input type="email" id="login-email" required placeholder="caja1@deliciapp.com"
+            class="w-full border-2 border-amber-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-terracota" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-canela mb-1">Clave de Acceso</label>
+          <input type="password" id="login-password" required placeholder="••••••••"
+            class="w-full border-2 border-amber-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-terracota" />
+        </div>
+
+        <p id="login-error" class="text-red-600 text-sm font-medium hidden"></p>
+
+        <button type="submit" id="login-btn"
+          class="w-full bg-terracota hover:bg-cobre text-white font-bold py-3 rounded-xl shadow-md transition">
+          Ingresar al Turno
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APLICACIÓN PRINCIPAL -->
+  <div id="app-screen" class="hidden flex-1 flex flex-col">
+    <!-- Barra Superior -->
+    <header class="bg-chocolate text-crema px-4 py-3 shadow-md flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+        <img src="./logo.jpg" alt="Logo" class="w-10 h-10 rounded-full bg-white p-0.5 object-contain" />
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight">DeliciApp</span>
+            <span id="badge-caja" class="bg-terracota text-white text-xs font-bold px-2.5 py-0.5 rounded-full">Caja 1</span>
+            <span id="badge-rol" class="bg-amber-200 text-chocolate text-xs font-bold px-2 py-0.5 rounded-full">Cajero</span>
+          </div>
+          <p id="user-display" class="text-xs text-amber-200"></p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-install" class="hidden bg-amber-500 hover:bg-amber-600 text-chocolate font-bold text-xs px-3 py-2 rounded-lg">
+          📲 Instalar App
+        </button>
+        <button id="btn-logout" class="bg-red-700 hover:bg-red-800 text-white text-xs font-bold px-3 py-2 rounded-lg">
+          Cerrar Sesión
+        </button>
+      </div>
+    </header>
+
+    <!-- Navegación por Pestañas -->
+    <nav class="bg-manteca border-b border-amber-200 px-3 py-2 flex gap-2 overflow-x-auto">
+      <button data-tab="pos" class="tab-btn active-tab px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-terracota text-white">
+        🛒 Punto de Venta
+      </button>
+      <button data-tab="clientes" class="tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+        🧾 Clientes y RUC
+      </button>
+      <button data-tab="arqueo" class="tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+        💰 Arqueo de Caja
+      </button>
+      <!-- Pestañas Exclusivas de Administrador -->
+      <button data-tab="creditos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+        📒 Créditos del Mes
+      </button>
+      <button data-tab="productos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+        🍩 Productos y Recetas
+      </button>
+      <button data-tab="reportes" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+        📊 Ranking y Ventas
+      </button>
+    </nav>
+
+    <!-- CONTENIDO DE PESTAÑAS -->
+    <main class="flex-1 p-3 sm:p-5 max-w-7xl w-full mx-auto">
+
+      <!-- 1. PUNTO DE VENTA (POS) -->
+      <section id="tab-pos" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Catálogo -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="flex flex-wrap gap-2 items-center justify-between bg-white p-3 rounded-2xl border border-amber-200 shadow-sm">
+            <input type="text" id="pos-search" placeholder="🔍 Buscar comida, bebida, dona..."
+              class="flex-1 min-w-[200px] border border-amber-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-terracota" />
+            <select id="pos-cat-filter" class="border border-amber-200 rounded-xl px-3 py-2 text-sm bg-crema font-medium">
+              <option value="Todas">Todas las categorías</option>
+              <option value="Comidas">Comidas / Salados</option>
+              <option value="Dulces">Dulces / Panadería</option>
+              <option value="Bebidas">Bebidas</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+
+          <div id="pos-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <!-- Productos dinámicos -->
+          </div>
+        </div>
+
+        <!-- Carrito y Cobro -->
+        <div class="bg-white border-2 border-amber-200 rounded-2xl p-4 shadow-md flex flex-col justify-between h-fit sticky top-4">
+          <div>
+            <div class="flex justify-between items-center border-b border-amber-100 pb-2 mb-3">
+              <h2 class="font-extrabold text-lg text-chocolate">Pedido Actual</h2>
+              <button id="btn-clear-cart" class="text-xs text-red-600 font-bold hover:underline">Vaciar</button>
+            </div>
+
+            <div id="cart-items" class="space-y-2 max-h-60 overflow-y-auto mb-4">
+              <p class="text-sm text-canela text-center py-6">Selecciona productos para iniciar</p>
+            </div>
+          </div>
+
+          <div class="border-t-2 border-amber-100 pt-3 space-y-3">
+            <div class="flex justify-between items-center text-xl font-black text-chocolate">
+              <span>TOTAL:</span>
+              <span id="cart-total">0 Gs.</span>
+            </div>
+
+            <!-- Método de Pago -->
+            <div>
+              <label class="block text-xs font-bold uppercase text-canela mb-1">Método de Pago</label>
+              <select id="pay-method" class="w-full border-2 border-amber-200 rounded-xl px-3 py-2 font-bold text-sm bg-crema">
+                <option value="Efectivo">💵 Efectivo</option>
+                <option value="QR Débito/Crédito">📱 QR Débito / Crédito</option>
+                <option value="Transferencia Cooperativa">🏦 Transferencia Cooperativa</option>
+                <option value="Crédito">📒 Crédito (Cuenta Mensual)</option>
+              </select>
+            </div>
+
+            <!-- Cálculo de vuelto si es Efectivo -->
+            <div id="cash-helper" class="bg-manteca p-2.5 rounded-xl space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold">Abona con (Gs.):</span>
+                <input type="number" id="cash-received" placeholder="Ej: 50000" class="w-32 border border-amber-300 rounded-lg px-2 py-1 text-right font-bold text-sm" />
+              </div>
+              <div class="flex justify-between text-xs font-bold text-terracota">
+                <span>Vuelto:</span>
+                <span id="cash-change">0 Gs.</span>
+              </div>
+            </div>
+
+            <!-- Selección de Cliente (Obligatorio en Crédito, opcional para Factura con RUC) -->
+            <div class="bg-crema border border-amber-200 p-2.5 rounded-xl space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-chocolate">Cliente / Factura RUC:</label>
+                <button type="button" id="btn-quick-client" class="text-xs bg-amber-200 hover:bg-amber-300 text-chocolate font-bold px-2 py-0.5 rounded-lg">
+                  + Nuevo
+                </button>
+              </div>
+              <select id="pos-client" class="w-full border border-amber-200 rounded-lg px-2 py-1.5 text-xs bg-white">
+                <option value="">-- Consumidor Final (Sin datos) --</option>
+              </select>
+              <label class="flex items-center gap-2 text-xs font-medium text-canela cursor-pointer">
+                <input type="checkbox" id="pos-factura" class="rounded text-terracota" />
+                Solicita Factura Legal con RUC
+              </label>
+            </div>
+
+            <button id="btn-checkout" class="w-full bg-terracota hover:bg-cobre text-white font-extrabold py-3.5 rounded-xl shadow-lg text-base transition">
+              ✅ Confirmar y Cobrar
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. CLIENTES Y RUC -->
+      <section id="tab-clientes" class="tab-content hidden space-y-4">
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+          <h2 class="font-extrabold text-lg mb-3">Registrar / Actualizar Perfil de Cliente</h2>
+          <form id="client-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+            <input type="text" id="cli-nombre" required placeholder="Denominación / Nombre y Apellido" class="border border-amber-200 rounded-xl px-3 py-2 text-sm md:col-span-2" />
+            <input type="text" id="cli-ruc" required placeholder="RUC o C.I. (Ej: 80012345-6)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <input type="text" id="cli-tel" placeholder="Teléfono / WhatsApp" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-1.5 text-xs font-bold cursor-pointer">
+                <input type="checkbox" id="cli-credito" class="w-4 h-4" />
+                Habilitar Crédito
+              </label>
+              <button type="submit" class="ml-auto bg-terracota text-white font-bold px-4 py-2 rounded-xl text-sm">Guardar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm overflow-x-auto">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-base">Listado de Clientes Registrados</h3>
+            <input type="text" id="cli-search" placeholder="Buscar por RUC o nombre..." class="border border-amber-200 rounded-xl px-3 py-1.5 text-sm" />
+          </div>
+          <table class="w-full text-left text-sm">
+            <thead class="bg-manteca text-chocolate">
+              <tr>
+                <th class="p-2.5 rounded-tl-lg">Denominación / Nombre</th>
+                <th class="p-2.5">RUC / C.I.</th>
+                <th class="p-2.5">Teléfono</th>
+                <th class="p-2.5 rounded-tr-lg">Crédito Mensual</th>
+              </tr>
+            </thead>
+            <tbody id="clients-table" class="divide-y divide-amber-100"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. ARQUEO DE CAJA -->
+      <section id="tab-arqueo" class="tab-content hidden space-y-4">
+        <div class="bg-white p-5 rounded-2xl border border-amber-200 shadow-sm max-w-2xl mx-auto space-y-4">
+          <div class="flex justify-between items-center border-b border-amber-100 pb-3">
+            <div>
+              <h2 class="font-extrabold text-lg">Arqueo y Cierre de Jornada</h2>
+              <p id="arqueo-subtitle" class="text-xs text-canela"></p>
+            </div>
+            <button id="btn-refresh-arqueo" class="text-xs bg-manteca px-3 py-1.5 rounded-lg font-bold">🔄 Actualizar Datos</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div class="bg-crema p-3 rounded-xl border border-amber-100">
+              <span class="text-xs text-canela block">Ventas en Efectivo (Sistema)</span>
+              <span id="arq-sys-efectivo" class="font-extrabold text-lg">0 Gs.</span>
+            </div>
+            <div class="bg-crema p-3 rounded-xl border border-amber-100">
+              <span class="text-xs text-canela block">QR Débito / Crédito</span>
+              <span id="arq-sys-qr" class="font-extrabold text-lg">0 Gs.</span>
+            </div>
+            <div class="bg-crema p-3 rounded-xl border border-amber-100">
+              <span class="text-xs text-canela block">Transferencia Cooperativa</span>
+              <span id="arq-sys-coop" class="font-extrabold text-lg">0 Gs.</span>
+            </div>
+            <div class="bg-crema p-3 rounded-xl border border-amber-100">
+              <span class="text-xs text-canela block">Ventas a Crédito (Fiado)</span>
+              <span id="arq-sys-credito" class="font-extrabold text-lg">0 Gs.</span>
+            </div>
+          </div>
+
+          <div class="bg-manteca p-4 rounded-xl space-y-3">
+            <div>
+              <label class="block text-xs font-bold uppercase text-chocolate mb-1">Efectivo Físico Contado en Caja (Gs.)</label>
+              <input type="number" id="arq-contado" placeholder="Ingresa el monto contado en billetes/monedas"
+                class="w-full border-2 border-amber-300 rounded-xl px-3 py-2 font-bold text-base bg-white" />
+            </div>
+            <div class="flex justify-between items-center font-bold text-sm">
+              <span>Diferencia (Sobrante / Faltante):</span>
+              <span id="arq-diferencia" class="text-base">0 Gs.</span>
+            </div>
+            <input type="text" id="arq-obs" placeholder="Observaciones del turno (opcional)"
+              class="w-full border border-amber-200 rounded-xl px-3 py-2 text-sm bg-white" />
+            <button id="btn-save-arqueo" class="w-full bg-chocolate hover:bg-black text-white font-bold py-3 rounded-xl">
+              🔒 Registrar Cierre de Caja
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. CRÉDITOS DEL MES (SOLO ADMIN) -->
+      <section id="tab-creditos" class="tab-content hidden space-y-4">
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+          <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <div>
+              <h2 class="font-extrabold text-lg">Estado de Cuentas a Crédito</h2>
+              <p class="text-xs text-canela">Detalle acumulado por cliente, fecha, N° de pedido y artículos</p>
+            </div>
+            <input type="month" id="cred-month" class="border border-amber-200 rounded-xl px-3 py-2 text-sm font-bold" />
+          </div>
+          <div id="creditos-list" class="space-y-4"></div>
+        </div>
+      </section>
+
+      <!-- 5. PRODUCTOS, INSUMOS Y RECETAS (SOLO ADMIN) -->
+      <section id="tab-productos" class="tab-content hidden space-y-5">
+        <!-- Calculadora de Receta / Costos por Tanda -->
+        <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-sm space-y-4">
+          <h2 class="font-extrabold text-lg text-terracota">🧮 Calculadora de Costos por Tanda / Receta</h2>
+          <p class="text-xs text-canela">Calcula el costo real de tus insumos (harina, azúcar, manteca, etc.) dividido por las unidades que rinde la tanda.</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input type="text" id="rec-nombre" placeholder="Nombre preparación (Ej: Donas Glaseadas)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <input type="number" id="rec-rinde" placeholder="Unidades por tanda (Ej: 24)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <input type="number" id="rec-precio-venta" placeholder="Precio Venta Unitario (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+          </div>
+
+          <div class="bg-crema p-3 rounded-xl border border-amber-100 space-y-2">
+            <div class="flex flex-wrap gap-2">
+              <input type="text" id="ins-nombre" placeholder="Insumo (Ej: Harina 1kg)" class="flex-1 min-w-[140px] border border-amber-200 rounded-lg px-2.5 py-1.5 text-sm bg-white" />
+              <input type="text" id="ins-cant" placeholder="Cant. usada (Ej: 1 kg)" class="w-36 border border-amber-200 rounded-lg px-2.5 py-1.5 text-sm bg-white" />
+              <input type="number" id="ins-costo" placeholder="Costo (Gs.)" class="w-32 border border-amber-200 rounded-lg px-2.5 py-1.5 text-sm bg-white" />
+              <button type="button" id="btn-add-insumo" class="bg-chocolate text-white text-xs font-bold px-3 py-1.5 rounded-lg">+ Agregar Insumo</button>
+            </div>
+            <ul id="insumos-temp-list" class="text-xs space-y-1 pt-2"></ul>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between bg-manteca p-3 rounded-xl gap-3">
+            <div class="text-xs space-y-0.5">
+              <p>Costo Total Tanda: <strong id="rec-total-tanda">0 Gs.</strong></p>
+              <p>Costo por Unidad: <strong id="rec-costo-unit" class="text-terracota text-sm">0 Gs.</strong></p>
+              <p>Ganancia Neta por Unidad: <strong id="rec-ganancia-unit" class="text-green-700 text-sm">0 Gs.</strong></p>
+            </div>
+            <button type="button" id="btn-save-receta-producto" class="bg-terracota hover:bg-cobre text-white font-bold px-4 py-2.5 rounded-xl text-sm">
+              💾 Guardar Producto con este Costo
+            </button>
+          </div>
+        </div>
+
+        <!-- Alta Rápida de Producto Simple (Bebidas / Reventa) -->
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+          <h3 class="font-extrabold text-base mb-3">Agregar / Editar Producto Directo (Reventa / Bebidas)</h3>
+          <form id="prod-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+            <input type="text" id="prod-nombre" required placeholder="Nombre del producto" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <select id="prod-cat" class="border border-amber-200 rounded-xl px-3 py-2 text-sm bg-crema">
+              <option value="Comidas">Comidas</option>
+              <option value="Dulces">Dulces</option>
+              <option value="Bebidas">Bebidas</option>
+              <option value="Otros">Otros</option>
+            </select>
+            <input type="number" id="prod-costo" required placeholder="Costo unitario (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <input type="number" id="prod-precio" required placeholder="Precio venta (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <button type="submit" class="bg-chocolate text-white font-bold rounded-xl py-2 text-sm">+ Guardar Producto</button>
+          </form>
+
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-manteca">
+                <tr>
+                  <th class="p-2">Producto</th>
+                  <th class="p-2">Categoría</th>
+                  <th class="p-2">Costo Unit.</th>
+                  <th class="p-2">Precio Venta</th>
+                  <th class="p-2">Ganancia</th>
+                  <th class="p-2">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-table" class="divide-y divide-amber-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. RANKING Y REPORTES (SOLO ADMIN) -->
+      <section id="tab-reportes" class="tab-content hidden space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+            <span class="text-xs text-canela font-bold uppercase">Ventas Totales (Filtradas)</span>
+            <p id="rep-total-ventas" class="text-2xl font-black text-chocolate mt-1">0 Gs.</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+            <span class="text-xs text-canela font-bold uppercase">Ganancia Neta Estimada</span>
+            <p id="rep-total-ganancia" class="text-2xl font-black text-green-700 mt-1">0 Gs.</p>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+            <span class="text-xs text-canela font-bold uppercase">Pedidos Realizados</span>
+            <p id="rep-cant-pedidos" class="text-2xl font-black text-terracota mt-1">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+          <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+            <h2 class="font-extrabold text-lg">🏆 Ranking de Ventas por Producto</h2>
+            <input type="date" id="rep-date" class="border border-amber-200 rounded-xl px-3 py-1.5 text-sm" />
+          </div>
+          <div id="ranking-list" class="space-y-2.5"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FIREBASE & LÓGICA DE DELICIAPP -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc,
+      query, where, orderBy, onSnapshot, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfZoqgZ0FLaN7u8U0zDvoSl-zvHso62Cs",
+      authDomain: "deliciapp-40586.firebaseapp.com",
+      projectId: "deliciapp-40586",
+      storageBucket: "deliciapp-40586.firebasestorage.app",
+      messagingSenderId: "518730173720",
+      appId: "1:518730173720:web:4cf148d3c6119f25b4226d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Estado Global
+    let currentUser = null;
+    let isAdmin = false;
+    let selectedCaja = localStorage.getItem('deliciapp_caja') || 'Caja 1';
+    let products = [];
+    let clients = [];
+    let cart = [];
+    let tempInsumos = [];
+
+    const ADMIN_EMAIL = 'admin@deliciapp.com';
+    const gs = (n) => Number(n || 0).toLocaleString('es-PY') + ' Gs.';
+    const todayStr = () => new Date().toISOString().slice(0, 10);
+    const currentMonthStr = () => new Date().toISOString().slice(0, 7);
+
+    // Registro Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    // Botón instalar PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('btn-install').classList.remove('hidden');
+    });
+    document.getElementById('btn-install').addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById('btn-install').classList.add('hidden');
+    });
+
+    // Autenticación
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      selectedCaja = document.getElementById('login-caja').value;
+      localStorage.setItem('deliciapp_caja', selectedCaja);
+      const errEl = document.getElementById('login-error');
+      errEl.classList.add('hidden');
+
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        errEl.textContent = 'Usuario o clave incorrectos. Verifica los datos.';
+        errEl.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        document.getElementById('badge-caja').textContent = selectedCaja;
+        document.getElementById('badge-rol').textContent = isAdmin ? 'Administrador' : 'Cajero';
+        document.getElementById('user-display').textContent = user.email;
+
+        document.querySelectorAll('.admin-only').forEach(el => {
+          el.classList.toggle('hidden', !isAdmin);
+        });
+
+        initRealtimeData();
+      } else {
+        currentUser = null;
+        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('app-screen').classList.add('hidden');
+      }
+    });
+
+    // Navegación Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('bg-terracota', 'text-white');
+          b.classList.add('bg-white', 'text-chocolate');
+        });
+        btn.classList.add('bg-terracota', 'text-white');
+        btn.classList.remove('bg-white', 'text-chocolate');
+
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
+        document.getElementById(`tab-${target}`).classList.remove('hidden');
+
+        if (target === 'arqueo') loadArqueo();
+        if (target === 'creditos' && isAdmin) loadCreditos();
+        if (target === 'reportes' && isAdmin) loadReportes();
+      });
+    });
+
+    // Sincronización en tiempo real de Productos y Clientes
+    function initRealtimeData() {
+      onSnapshot(collection(db, 'productos'), (snap) => {
+        products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderPOS();
+        if (isAdmin) renderAdminProducts();
+      });
+
+      onSnapshot(collection(db, 'clientes'), (snap) => {
+        clients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderClients();
+      });
+
+      document.getElementById('cred-month').value = currentMonthStr();
+      document.getElementById('rep-date').value = todayStr();
+    }
+
+    // --- PUNTO DE VENTA ---
+    function renderPOS() {
+      const search = document.getElementById('pos-search').value.toLowerCase();
+      const cat = document.getElementById('pos-cat-filter').value;
+      const grid = document.getElementById('pos-grid');
+      grid.innerHTML = '';
+
+      const filtered = products.filter(p =>
+        (cat === 'Todas' || p.categoria === cat) &&
+        p.nombre.toLowerCase().includes(search)
+      );
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<p class="col-span-full text-center text-sm text-canela py-8">No hay productos cargados aún.</p>';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const card = document.createElement('button');
+        card.className = 'bg-white hover:bg-manteca border-2 border-amber-200 rounded-2xl p-3 text-left shadow-sm transition flex flex-col justify-between';
+        card.innerHTML = `
+          <div>
+            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 text-canela">${p.categoria}</span>
+            <h3 class="font-bold text-sm text-chocolate mt-1.5 leading-snug">${p.nombre}</h3>
+          </div>
+          <p class="font-black text-terracota text-base mt-3">${gs(p.precio)}</p>
+        `;
+        card.onclick = () => addToCart(p);
+        grid.appendChild(card);
+      });
+    }
+
+    document.getElementById('pos-search').addEventListener('input', renderPOS);
+    document.getElementById('pos-cat-filter').addEventListener('change', renderPOS);
+
+    function addToCart(prod) {
+      const existing = cart.find(i => i.id === prod.id);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, costo: prod.costo || 0, qty: 1 });
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items');
+      if (cart.length === 0) {
+        container.innerHTML = '<p class="text-sm text-canela text-center py-6">Selecciona productos para iniciar</p>';
+        document.getElementById('cart-total').textContent = '0 Gs.';
+        updateChange();
+        return;
+      }
+
+      container.innerHTML = '';
+      let total = 0;
+      cart.forEach((item, idx) => {
+        total += item.precio * item.qty;
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-crema p-2 rounded-xl border border-amber-100 text-xs';
+        row.innerHTML = `
+          <div class="flex-1 pr-2">
+            <p class="font-bold text-chocolate">${item.nombre}</p>
+            <p class="text-canela">${gs(item.precio)} c/u</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button class="w-6 h-6 bg-amber-200 rounded font-bold" data-act="dec">-</button>
+            <span class="font-extrabold w-5 text-center">${item.qty}</span>
+            <button class="w-6 h-6 bg-amber-200 rounded font-bold" data-act="inc">+</button>
+          </div>
+        `;
+        row.querySelector('[data-act="dec"]').onclick = () => {
+          item.qty--;
+          if (item.qty <= 0) cart.splice(idx, 1);
+          renderCart();
+        };
+        row.querySelector('[data-act="inc"]').onclick = () => {
+          item.qty++;
+          renderCart();
+        };
+        container.appendChild(row);
+      });
+
+      document.getElementById('cart-total').textContent = gs(total);
+      updateChange();
+    }
+
+    document.getElementById('btn-clear-cart').onclick = () => { cart = []; renderCart(); };
+
+    const payMethodEl = document.getElementById('pay-method');
+    payMethodEl.addEventListener('change', () => {
+      document.getElementById('cash-helper').classList.toggle('hidden', payMethodEl.value !== 'Efectivo');
+    });
+
+    function updateChange() {
+      const total = cart.reduce((s, i) => s + i.precio * i.qty, 0);
+      const rec = Number(document.getElementById('cash-received').value || 0);
+      const change = rec > total ? rec - total : 0;
+      document.getElementById('cash-change').textContent = gs(change);
+    }
+    document.getElementById('cash-received').addEventListener('input', updateChange);
+
+    document.getElementById('btn-quick-client').onclick = () => {
+      document.querySelector('[data-tab="clientes"]').click();
+    };
+
+    // Confirmar Venta
+    document.getElementById('btn-checkout').addEventListener('click', async () => {
+      if (cart.length === 0) return alert('Agrega al menos un producto al pedido.');
+
+      const metodoPago = payMethodEl.value;
+      const clientId = document.getElementById('pos-client').value;
+      const requiereFactura = document.getElementById('pos-factura').checked;
+      const clientObj = clients.find(c => c.id === clientId);
+
+      if (metodoPago === 'Crédito') {
+        if (!clientObj) return alert('Para ventas a CRÉDITO debes seleccionar un cliente registrado.');
+        if (!clientObj.habilitadoCredito) return alert('Este cliente no tiene habilitada la cuenta a crédito.');
+      }
+
+      if (requiereFactura && !clientObj) {
+        return alert('Selecciona o registra el cliente con RUC y Denominación para emitir factura.');
+      }
+
+      const total = cart.reduce((s, i) => s + i.precio * i.qty, 0);
+      const costoTotal = cart.reduce((s, i) => s + (i.costo || 0) * i.qty, 0);
+      const numeroPedido = 'PED-' + Date.now().toString().slice(-6);
+
+      const ventaData = {
+        numeroPedido,
+        fecha: todayStr(),
+        mesAnio: currentMonthStr(),
+        timestamp: serverTimestamp(),
+        caja: selectedCaja,
+        cajero: currentUser.email,
+        items: cart.map(i => ({ id: i.id, nombre: i.nombre, qty: i.qty, precio: i.precio, costo: i.costo || 0 })),
+        total,
+        costoTotal,
+        metodoPago,
+        clienteId: clientObj ? clientObj.id : null,
+        clienteNombre: clientObj ? clientObj.nombre : 'Consumidor Final',
+        clienteRuc: clientObj ? clientObj.ruc : '',
+        requiereFactura,
+        pagadoCredito: metodoPago !== 'Crédito'
+      };
+
+      try {
+        await addDoc(collection(db, 'ventas'), ventaData);
+        alert(`✅ Pedido ${numeroPedido} registrado con éxito (${gs(total)} - ${metodoPago}).`);
+        cart = [];
+        document.getElementById('cash-received').value = '';
+        document.getElementById('pos-factura').checked = false;
+        renderCart();
+      } catch (e) {
+        alert('Error al guardar la venta: ' + e.message);
+      }
+    });
+
+    // --- CLIENTES Y RUC ---
+    document.getElementById('client-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('cli-nombre').value.trim();
+      const ruc = document.getElementById('cli-ruc').value.trim();
+      const tel = document.getElementById('cli-tel').value.trim();
+      const habilitadoCredito = document.getElementById('cli-credito').checked;
+
+      await addDoc(collection(db, 'clientes'), { nombre, ruc, tel, habilitadoCredito });
+      e.target.reset();
+      alert('Cliente guardado correctamente.');
+    });
+
+    function renderClients() {
+      const search = (document.getElementById('cli-search')?.value || '').toLowerCase();
+      const tbody = document.getElementById('clients-table');
+      const select = document.getElementById('pos-client');
+      tbody.innerHTML = '';
+      select.innerHTML = '<option value="">-- Consumidor Final (Sin datos) --</option>';
+
+      clients.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.nombre} (RUC: ${c.ruc}) ${c.habilitadoCredito ? '⭐ Crédito' : ''}`;
+        select.appendChild(opt);
+
+        if (c.nombre.toLowerCase().includes(search) || c.ruc.toLowerCase().includes(search)) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="p-2.5 font-bold">${c.nombre}</td>
+            <td class="p-2.5">${c.ruc}</td>
+            <td class="p-2.5">${c.tel || '-'}</td>
+            <td class="p-2.5">${c.habilitadoCredito ? '<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold">Habilitado</span>' : '<span class="text-xs text-gray-400">No</span>'}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      });
+    }
+    document.getElementById('cli-search').addEventListener('input', renderClients);
+
+    // --- ARQUEO DE CAJA ---
+    let currentArqueoTotals = { efectivo: 0, qr: 0, coop: 0, credito: 0 };
+
+    async function loadArqueo() {
+      document.getElementById('arqueo-subtitle').textContent = `${selectedCaja} • Fecha: ${todayStr()} • Cajero: ${currentUser.email}`;
+      const q = query(collection(db, 'ventas'), where('fecha', '==', todayStr()), where('caja', '==', selectedCaja));
+      const snap = await getDocs(q);
+
+      let efectivo = 0, qr = 0, coop = 0, credito = 0;
+      snap.forEach(d => {
+        const v = d.data();
+        if (v.metodoPago === 'Efectivo') efectivo += v.total;
+        else if (v.metodoPago === 'QR Débito/Crédito') qr += v.total;
+        else if (v.metodoPago === 'Transferencia Cooperativa') coop += v.total;
+        else if (v.metodoPago === 'Crédito') credito += v.total;
+      });
+
+      currentArqueoTotals = { efectivo, qr, coop, credito };
+      document.getElementById('arq-sys-efectivo').textContent = gs(efectivo);
+      document.getElementById('arq-sys-qr').textContent = gs(qr);
+      document.getElementById('arq-sys-coop').textContent = gs(coop);
+      document.getElementById('arq-sys-credito').textContent = gs(credito);
+      calcArqueoDiff();
+    }
+
+    function calcArqueoDiff() {
+      const contado = Number(document.getElementById('arq-contado').value || 0);
+      const diff = contado - currentArqueoTotals.efectivo;
+      const el = document.getElementById('arq-diferencia');
+      el.textContent = (diff > 0 ? '+' : '') + gs(diff);
+      el.className = diff === 0 ? 'text-green-700 font-black' : (diff < 0 ? 'text-red-600 font-black' : 'text-blue-700 font-black');
+    }
+    document.getElementById('arq-contado').addEventListener('input', calcArqueoDiff);
+    document.getElementById('btn-refresh-arqueo').onclick = loadArqueo;
+
+    document.getElementById('btn-save-arqueo').addEventListener('click', async () => {
+      const contado = Number(document.getElementById('arq-contado').value || 0);
+      await addDoc(collection(db, 'arqueos'), {
+        fecha: todayStr(),
+        timestamp: serverTimestamp(),
+        caja: selectedCaja,
+        cajero: currentUser.email,
+        ...currentArqueoTotals,
+        efectivoContado: contado,
+        diferencia: contado - currentArqueoTotals.efectivo,
+        observaciones: document.getElementById('arq-obs').value.trim()
+      });
+      alert('✅ Arqueo de caja registrado correctamente.');
+    });
+
+    // --- CRÉDITOS DEL MES (ADMIN) ---
+    async function loadCreditos() {
+      const mes = document.getElementById('cred-month').value || currentMonthStr();
+      const q = query(collection(db, 'ventas'), where('mesAnio', '==', mes), where('metodoPago', '==', 'Crédito'));
+      const snap = await getDocs(q);
+      const container = document.getElementById('creditos-list');
+      container.innerHTML = '';
+
+      const grouped = {};
+      snap.forEach(docSnap => {
+        const v = { id: docSnap.id, ...docSnap.data() };
+        const key = v.clienteId || v.clienteNombre;
+        if (!grouped[key]) grouped[key] = { nombre: v.clienteNombre, ruc: v.clienteRuc, ventas: [], totalPendiente: 0 };
+        grouped[key].ventas.push(v);
+        if (!v.pagadoCredito) grouped[key].totalPendiente += v.total;
+      });
+
+      const keys = Object.keys(grouped);
+      if (keys.length === 0) {
+        container.innerHTML = '<p class="text-sm text-canela py-4">No hay compras a crédito registradas en este mes.</p>';
+        return;
+      }
+
+      keys.forEach(k => {
+        const g = grouped[k];
+        const card = document.createElement('div');
+        card.className = 'border-2 border-amber-200 rounded-2xl p-4 bg-crema space-y-2';
+        const rowsHtml = g.ventas.map(v => {
+          const itemsTxt = v.items.map(i => `${i.qty}x ${i.nombre}`).join(', ');
+          return `
+            <tr class="border-t border-amber-100 text-xs">
+              <td class="py-1.5 font-mono">${v.fecha}</td>
+              <td class="py-1.5 font-bold">${v.numeroPedido}</td>
+              <td class="py-1.5">${itemsTxt}</td>
+              <td class="py-1.5 font-bold">${gs(v.total)}</td>
+              <td class="py-1.5">
+                ${v.pagadoCredito
+                  ? '<span class="text-green-700 font-bold">Saldado</span>'
+                  : `<button data-vid="${v.id}" class="btn-pay-cred bg-terracota text-white px-2 py-0.5 rounded font-bold">Marcar Pagado</button>`}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="flex flex-wrap justify-between items-center">
+            <div>
+              <h3 class="font-extrabold text-base text-chocolate">${g.nombre}</h3>
+              <p class="text-xs text-canela">RUC: ${g.ruc || 'N/A'}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-canela block">Saldo Pendiente del Mes</span>
+              <span class="font-black text-lg text-terracota">${gs(g.totalPendiente)}</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead><tr class="text-[11px] uppercase text-canela"><th>Fecha</th><th>Pedido</th><th>Artículos</th><th>Monto</th><th>Estado</th></tr></thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+        card.querySelectorAll('.btn-pay-cred').forEach(b => {
+          b.onclick = async () => {
+            await updateDoc(doc(db, 'ventas', b.dataset.vid), { pagadoCredito: true });
+            loadCreditos();
+          };
+        });
+        container.appendChild(card);
+      });
+    }
+    document.getElementById('cred-month').addEventListener('change', loadCreditos);
+
+    // --- RECETAS, INSUMOS Y PRODUCTOS (ADMIN) ---
+    function updateRecetaCalc() {
+      const totalTanda = tempInsumos.reduce((s, i) => s + Number(i.costo || 0), 0);
+      const rinde = Number(document.getElementById('rec-rinde').value || 0);
+      const precioVenta = Number(document.getElementById('rec-precio-venta').value || 0);
+      const costoUnit = rinde > 0 ? Math.round(totalTanda / rinde) : 0;
+      const gananciaUnit = precioVenta - costoUnit;
+
+      document.getElementById('rec-total-tanda').textContent = gs(totalTanda);
+      document.getElementById('rec-costo-unit').textContent = gs(costoUnit);
+      document.getElementById('rec-ganancia-unit').textContent = gs(gananciaUnit);
+      return { totalTanda, rinde, precioVenta, costoUnit };
+    }
+
+    document.getElementById('btn-add-insumo').onclick = () => {
+      const nombre = document.getElementById('ins-nombre').value.trim();
+      const cant = document.getElementById('ins-cant').value.trim();
+      const costo = Number(document.getElementById('ins-costo').value || 0);
+      if (!nombre || costo <= 0) return;
+
+      tempInsumos.push({ nombre, cant, costo });
+      document.getElementById('ins-nombre').value = '';
+      document.getElementById('ins-cant').value = '';
+      document.getElementById('ins-costo').value = '';
+      renderTempInsumos();
+    };
+
+    function renderTempInsumos() {
+      const ul = document.getElementById('insumos-temp-list');
+      ul.innerHTML = tempInsumos.map((ins, i) => `
+        <li class="flex justify-between items-center bg-white px-2.5 py-1 rounded border border-amber-100">
+          <span><strong>${ins.nombre}</strong> (${ins.cant}) - ${gs(ins.costo)}</span>
+          <button onclick="this.parentElement.remove()" data-idx="${i}" class="text-red-600 font-bold">✕</button>
+        </li>
+      `).join('');
+      ul.querySelectorAll('button').forEach(b => {
+        b.onclick = () => { tempInsumos.splice(Number(b.dataset.idx), 1); renderTempInsumos(); };
+      });
+      updateRecetaCalc();
+    }
+
+    document.getElementById('rec-rinde').addEventListener('input', updateRecetaCalc);
+    document.getElementById('rec-precio-venta').addEventListener('input', updateRecetaCalc);
+
+    document.getElementById('btn-save-receta-producto').onclick = async () => {
+      const nombre = document.getElementById('rec-nombre').value.trim();
+      const { totalTanda, rinde, precioVenta, costoUnit } = updateRecetaCalc();
+      if (!nombre || rinde <= 0 || precioVenta <= 0) {
+        return alert('Completa el nombre, unidades por tanda y precio de venta.');
+      }
+
+      await addDoc(collection(db, 'recetas'), {
+        nombre, rinde, totalTanda, costoUnit, insumos: tempInsumos, fecha: todayStr()
+      });
+      await addDoc(collection(db, 'productos'), {
+        nombre, categoria: 'Dulces', costo: costoUnit, precio: precioVenta
+      });
+
+      tempInsumos = [];
+      document.getElementById('rec-nombre').value = '';
+      document.getElementById('rec-rinde').value = '';
+      document.getElementById('rec-precio-venta').value = '';
+      renderTempInsumos();
+      alert(`✅ Producto "${nombre}" creado con costo unitario de ${gs(costoUnit)}.`);
+    };
+
+    document.getElementById('prod-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await addDoc(collection(db, 'productos'), {
+        nombre: document.getElementById('prod-nombre').value.trim(),
+        categoria: document.getElementById('prod-cat').value,
+        costo: Number(document.getElementById('prod-costo').value || 0),
+        precio: Number(document.getElementById('prod-precio').value || 0)
+      });
+      e.target.reset();
+    });
+
+    function renderAdminProducts() {
+      const tbody = document.getElementById('admin-products-table');
+      tbody.innerHTML = '';
+      products.forEach(p => {
+        const gan = (p.precio || 0) - (p.costo || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2 font-bold">${p.nombre}</td>
+          <td class="p-2">${p.categoria}</td>
+          <td class="p-2 text-canela">${gs(p.costo)}</td>
+          <td class="p-2 font-bold text-terracota">${gs(p.precio)}</td>
+          <td class="p-2 font-bold text-green-700">${gs(gan)}</td>
+          <td class="p-2"><button class="text-red-600 text-xs font-bold hover:underline">Eliminar</button></td>
+        `;
+        tr.querySelector('button').onclick = async () => {
+          if (confirm(`¿Eliminar ${p.nombre}?`)) await deleteDoc(doc(db, 'productos', p.id));
+        };
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- RANKING Y REPORTES (ADMIN) ---
+    async function loadReportes() {
+      const fecha = document.getElementById('rep-date').value || todayStr();
+      const q = query(collection(db, 'ventas'), where('fecha', '==', fecha));
+      const snap = await getDocs(q);
+
+      let totalVentas = 0, totalCosto = 0, pedidos = 0;
+      const rankingMap = {};
+
+      snap.forEach(d => {
+        const v = d.data();
+        totalVentas += v.total;
+        totalCosto += (v.costoTotal || 0);
+        pedidos++;
+        (v.items || []).forEach(it => {
+          if (!rankingMap[it.nombre]) rankingMap[it.nombre] = { nombre: it.nombre, qty: 0, total: 0 };
+          rankingMap[it.nombre].qty += it.qty;
+          rankingMap[it.nombre].total += it.qty * it.precio;
+        });
+      });
+
+      document.getElementById('rep-total-ventas').textContent = gs(totalVentas);
+      document.getElementById('rep-total-ganancia').textContent = gs(totalVentas - totalCosto);
+      document.getElementById('rep-cant-pedidos').textContent = pedidos;
+
+      const sorted = Object.values(rankingMap).sort((a, b) => b.qty - a.qty);
+      const list = document.getElementById('ranking-list');
+      if (sorted.length === 0) {
+        list.innerHTML = '<p class="text-sm text-canela">No hay ventas registradas en esta fecha.</p>';
+        return;
+      }
+
+      const maxQty = sorted[0].qty || 1;
+      list.innerHTML = sorted.map((item, idx) => `
+        <div class="bg-crema p-3 rounded-xl border border-amber-100">
+          <div class="flex justify-between text-sm font-bold mb-1">
+            <span>#${idx + 1} ${item.nombre}</span>
+            <span>${item.qty} unid. • ${gs(item.total)}</span>
+          </div>
+          <div class="w-full bg-amber-100 h-2.5 rounded-full overflow-hidden">
+            <div class="bg-terracota h-full rounded-full" style="width: ${Math.round((item.qty / maxQty) * 100)}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+    document.getElementById('rep-date').addEventListener('change', loadReportes);
+  </script>
+</body>
+</html>

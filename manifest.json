@@ -1,0 +1,25 @@
+{
+  "name": "DeliciApp - Delicias Artesanales",
+  "short_name": "DeliciApp",
+  "description": "Sistema de Punto de Venta, Cajas, Créditos y Costos para Cantina",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFDF7",
+  "theme_color": "#C85A17",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
