@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DeliciApp - Delicias Artesanales</title>
   <link rel="manifest" href="./manifest.json" />
-  <link rel="icon" type="image/png" href="./logo.jpg" />
+  <link rel="icon" type="image/jpeg" href="./logo.jpg" />
   <meta name="theme-color" content="#C85A17" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Librería SheetJS para exportar archivos Excel (.xlsx) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -132,7 +134,6 @@
 
       <!-- 1. PUNTO DE VENTA (POS) -->
       <section id="tab-pos" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <!-- Catálogo -->
         <div class="lg:col-span-2 space-y-4">
           <div class="flex flex-wrap gap-2 items-center justify-between bg-white p-3 rounded-2xl border border-amber-200 shadow-sm">
             <input type="text" id="pos-search" placeholder="🔍 Buscar comida, bebida, dona..."
@@ -146,9 +147,7 @@
             </select>
           </div>
 
-          <div id="pos-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            <!-- Productos dinámicos -->
-          </div>
+          <div id="pos-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
         </div>
 
         <!-- Carrito y Cobro -->
@@ -170,7 +169,6 @@
               <span id="cart-total">0 Gs.</span>
             </div>
 
-            <!-- Método de Pago -->
             <div>
               <label class="block text-xs font-bold uppercase text-canela mb-1">Método de Pago</label>
               <select id="pay-method" class="w-full border-2 border-amber-200 rounded-xl px-3 py-2 font-bold text-sm bg-crema">
@@ -181,7 +179,6 @@
               </select>
             </div>
 
-            <!-- Cálculo de vuelto si es Efectivo -->
             <div id="cash-helper" class="bg-manteca p-2.5 rounded-xl space-y-2">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-xs font-bold">Abona con (Gs.):</span>
@@ -193,7 +190,6 @@
               </div>
             </div>
 
-            <!-- Selección de Cliente (Obligatorio en Crédito, opcional para Factura con RUC) -->
             <div class="bg-crema border border-amber-200 p-2.5 rounded-xl space-y-2">
               <div class="flex items-center justify-between">
                 <label class="text-xs font-bold text-chocolate">Cliente / Factura RUC:</label>
@@ -311,7 +307,12 @@
               <h2 class="font-extrabold text-lg">Estado de Cuentas a Crédito</h2>
               <p class="text-xs text-canela">Detalle acumulado por cliente, fecha, N° de pedido y artículos</p>
             </div>
-            <input type="month" id="cred-month" class="border border-amber-200 rounded-xl px-3 py-2 text-sm font-bold" />
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="month" id="cred-month" class="border border-amber-200 rounded-xl px-3 py-2 text-sm font-bold" />
+              <button id="btn-export-creditos" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow">
+                📥 Descargar Excel Créditos
+              </button>
+            </div>
           </div>
           <div id="creditos-list" class="space-y-4"></div>
         </div>
@@ -319,7 +320,6 @@
 
       <!-- 5. PRODUCTOS, INSUMOS Y RECETAS (SOLO ADMIN) -->
       <section id="tab-productos" class="tab-content hidden space-y-5">
-        <!-- Calculadora de Receta / Costos por Tanda -->
         <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-sm space-y-4">
           <h2 class="font-extrabold text-lg text-terracota">🧮 Calculadora de Costos por Tanda / Receta</h2>
           <p class="text-xs text-canela">Calcula el costo real de tus insumos (harina, azúcar, manteca, etc.) dividido por las unidades que rinde la tanda.</p>
@@ -352,7 +352,6 @@
           </div>
         </div>
 
-        <!-- Alta Rápida de Producto Simple (Bebidas / Reventa) -->
         <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
           <h3 class="font-extrabold text-base mb-3">Agregar / Editar Producto Directo (Reventa / Bebidas)</h3>
           <form id="prod-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
@@ -406,7 +405,12 @@
         <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
           <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
             <h2 class="font-extrabold text-lg">🏆 Ranking de Ventas por Producto</h2>
-            <input type="date" id="rep-date" class="border border-amber-200 rounded-xl px-3 py-1.5 text-sm" />
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="date" id="rep-date" class="border border-amber-200 rounded-xl px-3 py-1.5 text-sm" />
+              <button id="btn-export-reporte" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow">
+                📥 Descargar Excel Ventas y Ranking
+              </button>
+            </div>
           </div>
           <div id="ranking-list" class="space-y-2.5"></div>
         </div>
@@ -421,7 +425,7 @@
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc,
-      query, where, orderBy, onSnapshot, serverTimestamp
+      query, where, onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -437,7 +441,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Estado Global
     let currentUser = null;
     let isAdmin = false;
     let selectedCaja = localStorage.getItem('deliciapp_caja') || 'Caja 1';
@@ -445,18 +448,19 @@
     let clients = [];
     let cart = [];
     let tempInsumos = [];
+    let lastReportSales = [];
+    let lastRankingSorted = [];
+    let lastCreditSales = [];
 
     const ADMIN_EMAIL = 'admin@deliciapp.com';
     const gs = (n) => Number(n || 0).toLocaleString('es-PY') + ' Gs.';
     const todayStr = () => new Date().toISOString().slice(0, 10);
     const currentMonthStr = () => new Date().toISOString().slice(0, 7);
 
-    // Registro Service Worker PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    // Botón instalar PWA
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -471,7 +475,6 @@
       document.getElementById('btn-install').classList.add('hidden');
     });
 
-    // Autenticación
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
@@ -513,7 +516,6 @@
       }
     });
 
-    // Navegación Tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => {
@@ -533,7 +535,6 @@
       });
     });
 
-    // Sincronización en tiempo real de Productos y Clientes
     function initRealtimeData() {
       onSnapshot(collection(db, 'productos'), (snap) => {
         products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -550,7 +551,6 @@
       document.getElementById('rep-date').value = todayStr();
     }
 
-    // --- PUNTO DE VENTA ---
     function renderPOS() {
       const search = document.getElementById('pos-search').value.toLowerCase();
       const cat = document.getElementById('pos-cat-filter').value;
@@ -656,7 +656,6 @@
       document.querySelector('[data-tab="clientes"]').click();
     };
 
-    // Confirmar Venta
     document.getElementById('btn-checkout').addEventListener('click', async () => {
       if (cart.length === 0) return alert('Agrega al menos un producto al pedido.');
 
@@ -708,7 +707,6 @@
       }
     });
 
-    // --- CLIENTES Y RUC ---
     document.getElementById('client-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const nombre = document.getElementById('cli-nombre').value.trim();
@@ -748,7 +746,6 @@
     }
     document.getElementById('cli-search').addEventListener('input', renderClients);
 
-    // --- ARQUEO DE CAJA ---
     let currentArqueoTotals = { efectivo: 0, qr: 0, coop: 0, credito: 0 };
 
     async function loadArqueo() {
@@ -798,17 +795,18 @@
       alert('✅ Arqueo de caja registrado correctamente.');
     });
 
-    // --- CRÉDITOS DEL MES (ADMIN) ---
     async function loadCreditos() {
       const mes = document.getElementById('cred-month').value || currentMonthStr();
       const q = query(collection(db, 'ventas'), where('mesAnio', '==', mes), where('metodoPago', '==', 'Crédito'));
       const snap = await getDocs(q);
       const container = document.getElementById('creditos-list');
       container.innerHTML = '';
+      lastCreditSales = [];
 
       const grouped = {};
       snap.forEach(docSnap => {
         const v = { id: docSnap.id, ...docSnap.data() };
+        lastCreditSales.push(v);
         const key = v.clienteId || v.clienteNombre;
         if (!grouped[key]) grouped[key] = { nombre: v.clienteNombre, ruc: v.clienteRuc, ventas: [], totalPendiente: 0 };
         grouped[key].ventas.push(v);
@@ -871,7 +869,27 @@
     }
     document.getElementById('cred-month').addEventListener('change', loadCreditos);
 
-    // --- RECETAS, INSUMOS Y PRODUCTOS (ADMIN) ---
+    // Exportar Excel Créditos del Mes
+    document.getElementById('btn-export-creditos').addEventListener('click', () => {
+      if (lastCreditSales.length === 0) return alert('No hay datos de créditos en este mes para exportar.');
+      const mes = document.getElementById('cred-month').value || currentMonthStr();
+      const rows = lastCreditSales.map(v => ({
+        'Mes': mes,
+        'Fecha': v.fecha,
+        'N° Pedido': v.numeroPedido,
+        'Cliente / Denominación': v.clienteNombre,
+        'RUC': v.clienteRuc || '',
+        'Caja': v.caja,
+        'Artículos Comprados': (v.items || []).map(i => `${i.qty}x ${i.nombre}`).join(', '),
+        'Monto (Gs.)': v.total,
+        'Estado': v.pagadoCredito ? 'Saldado' : 'Pendiente'
+      }));
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, 'Creditos_Mes');
+      XLSX.writeFile(wb, `DeliciApp_Creditos_${mes}.xlsx`);
+    });
+
     function updateRecetaCalc() {
       const totalTanda = tempInsumos.reduce((s, i) => s + Number(i.costo || 0), 0);
       const rinde = Number(document.getElementById('rec-rinde').value || 0);
@@ -903,7 +921,7 @@
       ul.innerHTML = tempInsumos.map((ins, i) => `
         <li class="flex justify-between items-center bg-white px-2.5 py-1 rounded border border-amber-100">
           <span><strong>${ins.nombre}</strong> (${ins.cant}) - ${gs(ins.costo)}</span>
-          <button onclick="this.parentElement.remove()" data-idx="${i}" class="text-red-600 font-bold">✕</button>
+          <button data-idx="${i}" class="text-red-600 font-bold">✕</button>
         </li>
       `).join('');
       ul.querySelectorAll('button').forEach(b => {
@@ -969,7 +987,6 @@
       });
     }
 
-    // --- RANKING Y REPORTES (ADMIN) ---
     async function loadReportes() {
       const fecha = document.getElementById('rep-date').value || todayStr();
       const q = query(collection(db, 'ventas'), where('fecha', '==', fecha));
@@ -977,9 +994,11 @@
 
       let totalVentas = 0, totalCosto = 0, pedidos = 0;
       const rankingMap = {};
+      lastReportSales = [];
 
       snap.forEach(d => {
         const v = d.data();
+        lastReportSales.push(v);
         totalVentas += v.total;
         totalCosto += (v.costoTotal || 0);
         pedidos++;
@@ -995,6 +1014,7 @@
       document.getElementById('rep-cant-pedidos').textContent = pedidos;
 
       const sorted = Object.values(rankingMap).sort((a, b) => b.qty - a.qty);
+      lastRankingSorted = sorted;
       const list = document.getElementById('ranking-list');
       if (sorted.length === 0) {
         list.innerHTML = '<p class="text-sm text-canela">No hay ventas registradas en esta fecha.</p>';
@@ -1015,6 +1035,39 @@
       `).join('');
     }
     document.getElementById('rep-date').addEventListener('change', loadReportes);
+
+    // Exportar Excel Ventas y Ranking del Día
+    document.getElementById('btn-export-reporte').addEventListener('click', () => {
+      if (lastReportSales.length === 0) return alert('No hay ventas en esta fecha para exportar.');
+      const fecha = document.getElementById('rep-date').value || todayStr();
+
+      const ventasRows = lastReportSales.map(v => ({
+        'Fecha': v.fecha,
+        'N° Pedido': v.numeroPedido,
+        'Caja': v.caja,
+        'Cajero': v.cajero,
+        'Cliente': v.clienteNombre,
+        'RUC': v.clienteRuc || '',
+        'Solicita Factura': v.requiereFactura ? 'Sí' : 'No',
+        'Método de Pago': v.metodoPago,
+        'Detalle Artículos': (v.items || []).map(i => `${i.qty}x ${i.nombre}`).join(', '),
+        'Costo Total (Gs.)': v.costoTotal || 0,
+        'Venta Total (Gs.)': v.total,
+        'Ganancia Neta (Gs.)': v.total - (v.costoTotal || 0)
+      }));
+
+      const rankingRows = lastRankingSorted.map((r, idx) => ({
+        'Posición': idx + 1,
+        'Producto': r.nombre,
+        'Unidades Vendidas': r.qty,
+        'Total Recaudado (Gs.)': r.total
+      }));
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ventasRows), 'Detalle_Ventas');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rankingRows), 'Ranking_Productos');
+      XLSX.writeFile(wb, `DeliciApp_Ventas_${fecha}.xlsx`);
+    });
   </script>
 </body>
 </html>
