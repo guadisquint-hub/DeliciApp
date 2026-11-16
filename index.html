@@ -105,6 +105,25 @@
       </div>
     </header>
 
+    <!-- NOTIFICACIÓN DE CIERRE DE MES PARA FACTURACIÓN ÚNICA (SOLO ADMIN) -->
+    <div id="eom-banner" class="hidden bg-amber-100 border-b-2 border-terracota px-4 py-3 text-chocolate">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-start gap-2.5">
+          <span class="text-2xl">🔔</span>
+          <div>
+            <p class="font-extrabold text-sm text-cobre">Recordatorio de Cierre de Mes: Facturas Únicas Pendientes de Emisión</p>
+            <div id="eom-banner-summary" class="text-xs text-chocolate mt-1 space-y-0.5"></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-go-facturacion" class="bg-terracota hover:bg-cobre text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow">
+            Ver Detalle y Exportar
+          </button>
+          <button id="btn-dismiss-eom" class="text-xs text-canela hover:text-chocolate font-bold px-2 py-1">✕</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Navegación por Pestañas -->
     <nav class="bg-manteca border-b border-amber-200 px-3 py-2 flex gap-2 overflow-x-auto">
       <button data-tab="pos" class="tab-btn active-tab px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-terracota text-white">
@@ -118,6 +137,9 @@
       </button>
       <button data-tab="creditos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         📒 Créditos del Mes
+      </button>
+      <button data-tab="facturacion" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+        📑 Facturación Mensual
       </button>
       <button data-tab="productos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         🍩 Productos y Recetas
@@ -157,19 +179,19 @@
               <button id="btn-clear-cart" class="text-xs text-red-600 font-bold hover:underline">Vaciar</button>
             </div>
 
-            <div id="cart-items" class="space-y-2 max-h-60 overflow-y-auto mb-3">
+            <div id="cart-items" class="space-y-2 max-h-56 overflow-y-auto mb-3">
               <p class="text-sm text-canela text-center py-6">Selecciona productos para iniciar</p>
             </div>
           </div>
 
           <div class="border-t-2 border-amber-100 pt-3 space-y-3">
             <!-- Opción Tildable de Delivery -->
-            <label class="flex items-center justify-between bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 px-3 py-2.5 rounded-xl cursor-pointer transition">
+            <label class="flex items-center justify-between bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 px-3 py-2 rounded-xl cursor-pointer transition">
               <div class="flex items-center gap-2">
                 <input type="checkbox" id="pos-delivery" class="w-4 h-4 accent-terracota rounded" />
                 <span class="text-xs font-extrabold text-chocolate">🛵 Servicio de Delivery</span>
               </div>
-              <span class="text-xs font-black text-terracota">+10.000 Gs.</span>
+              <span id="pos-delivery-label" class="text-xs font-black text-terracota">+10.000 Gs.</span>
             </label>
 
             <div class="flex justify-between items-center text-xl font-black text-chocolate">
@@ -177,16 +199,43 @@
               <span id="cart-total">0 Gs.</span>
             </div>
 
+            <!-- Selección de Cliente -->
+            <div class="bg-crema border border-amber-200 p-2.5 rounded-xl space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-chocolate">Cliente / RUC:</label>
+                <button type="button" id="btn-quick-client" class="text-xs bg-amber-200 hover:bg-amber-300 text-chocolate font-bold px-2 py-0.5 rounded-lg">
+                  + Nuevo Cliente
+                </button>
+              </div>
+              <select id="pos-client" class="w-full border border-amber-200 rounded-lg px-2 py-1.5 text-xs bg-white font-medium">
+                <option value="">-- Consumidor Final (Sin datos) --</option>
+              </select>
+
+              <div class="space-y-1.5 pt-1 border-t border-amber-100">
+                <label class="flex items-center gap-2 text-xs font-medium text-canela cursor-pointer">
+                  <input type="checkbox" id="pos-factura" class="rounded accent-terracota" />
+                  Solicita Factura Legal en el momento
+                </label>
+                <label class="flex items-center gap-2 text-xs font-bold text-terracota cursor-pointer">
+                  <input type="checkbox" id="pos-acumular-factura" class="rounded accent-terracota" />
+                  🧾 Acumular para Factura Única a fin de mes
+                </label>
+              </div>
+            </div>
+
+            <!-- Método de Pago -->
             <div>
               <label class="block text-xs font-bold uppercase text-canela mb-1">Método de Pago</label>
               <select id="pay-method" class="w-full border-2 border-amber-200 rounded-xl px-3 py-2 font-bold text-sm bg-crema">
                 <option value="Efectivo">💵 Efectivo</option>
                 <option value="QR Débito/Crédito">📱 QR Débito / Crédito</option>
                 <option value="Transferencia Cooperativa">🏦 Transferencia Cooperativa</option>
+                <option value="Transferencia Bancaria">🏛️ Transferencia Bancaria</option>
                 <option value="Crédito">📒 Crédito (Cuenta Mensual)</option>
               </select>
             </div>
 
+            <!-- Helper Efectivo -->
             <div id="cash-helper" class="bg-manteca p-2.5 rounded-xl space-y-2">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-xs font-bold">Abona con (Gs.):</span>
@@ -198,20 +247,22 @@
               </div>
             </div>
 
-            <div class="bg-crema border border-amber-200 p-2.5 rounded-xl space-y-2">
-              <div class="flex items-center justify-between">
-                <label class="text-xs font-bold text-chocolate">Cliente / Factura RUC:</label>
-                <button type="button" id="btn-quick-client" class="text-xs bg-amber-200 hover:bg-amber-300 text-chocolate font-bold px-2 py-0.5 rounded-lg">
-                  + Nuevo
-                </button>
-              </div>
-              <select id="pos-client" class="w-full border border-amber-200 rounded-lg px-2 py-1.5 text-xs bg-white">
-                <option value="">-- Consumidor Final (Sin datos) --</option>
+            <!-- Helper Transferencia Cooperativa -->
+            <div id="coop-helper" class="hidden bg-blue-50 border border-blue-200 p-2.5 rounded-xl space-y-2">
+              <label class="block text-xs font-bold text-blue-900">Cuenta de Cooperativa del Cliente:</label>
+              <select id="coop-saved-select" class="w-full border border-blue-200 rounded-lg px-2 py-1.5 text-xs bg-white font-semibold">
+                <option value="__new__">+ Ingresar nueva cuenta de cooperativa...</option>
               </select>
-              <label class="flex items-center gap-2 text-xs font-medium text-canela cursor-pointer">
-                <input type="checkbox" id="pos-factura" class="rounded text-terracota" />
-                Solicita Factura Legal con RUC
-              </label>
+              <input type="text" id="coop-new-account" placeholder="N° Cuenta / Socio (Ej: Cta. 45890 - Chortitzer)"
+                class="w-full border border-blue-300 rounded-lg px-2.5 py-1.5 text-xs bg-white" />
+              <p class="text-[11px] text-blue-700">Si seleccionas un cliente, la cuenta nueva quedará guardada en su perfil.</p>
+            </div>
+
+            <!-- Helper Transferencia Bancaria -->
+            <div id="bank-helper" class="hidden bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl space-y-1.5">
+              <label class="block text-xs font-bold text-emerald-900">N° de Comprobante / Transferencia Bancaria:</label>
+              <input type="text" id="bank-ref-input" placeholder="Ej: TRF-9845120 / Banco Itaú"
+                class="w-full border border-emerald-300 rounded-lg px-2.5 py-1.5 text-xs bg-white font-mono" />
             </div>
 
             <button id="btn-checkout" class="w-full bg-terracota hover:bg-cobre text-white font-extrabold py-3.5 rounded-xl shadow-lg text-base transition">
@@ -225,14 +276,15 @@
       <section id="tab-clientes" class="tab-content hidden space-y-4">
         <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
           <h2 class="font-extrabold text-lg mb-3">Registrar / Actualizar Perfil de Cliente</h2>
-          <form id="client-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+          <form id="client-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
             <input type="text" id="cli-nombre" required placeholder="Denominación / Nombre y Apellido" class="border border-amber-200 rounded-xl px-3 py-2 text-sm md:col-span-2" />
             <input type="text" id="cli-ruc" required placeholder="RUC o C.I. (Ej: 80012345-6)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
             <input type="text" id="cli-tel" placeholder="Teléfono / WhatsApp" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <input type="text" id="cli-coop-init" placeholder="Cta. Cooperativa (opcional)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
             <div class="flex items-center gap-2">
               <label class="flex items-center gap-1.5 text-xs font-bold cursor-pointer">
                 <input type="checkbox" id="cli-credito" class="w-4 h-4" />
-                Habilitar Crédito
+                Crédito
               </label>
               <button type="submit" class="ml-auto bg-terracota text-white font-bold px-4 py-2 rounded-xl text-sm">Guardar</button>
             </div>
@@ -250,6 +302,7 @@
                 <th class="p-2.5 rounded-tl-lg">Denominación / Nombre</th>
                 <th class="p-2.5">RUC / C.I.</th>
                 <th class="p-2.5">Teléfono</th>
+                <th class="p-2.5">Cuentas Cooperativa</th>
                 <th class="p-2.5 rounded-tr-lg">Crédito Mensual</th>
               </tr>
             </thead>
@@ -269,9 +322,9 @@
             <button id="btn-refresh-arqueo" class="text-xs bg-manteca px-3 py-1.5 rounded-lg font-bold">🔄 Actualizar Datos</button>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
             <div class="bg-crema p-3 rounded-xl border border-amber-100">
-              <span class="text-xs text-canela block">Ventas en Efectivo (Sistema)</span>
+              <span class="text-xs text-canela block">Efectivo (Sistema)</span>
               <span id="arq-sys-efectivo" class="font-extrabold text-lg">0 Gs.</span>
             </div>
             <div class="bg-crema p-3 rounded-xl border border-amber-100">
@@ -279,10 +332,14 @@
               <span id="arq-sys-qr" class="font-extrabold text-lg">0 Gs.</span>
             </div>
             <div class="bg-crema p-3 rounded-xl border border-amber-100">
-              <span class="text-xs text-canela block">Transferencia Cooperativa</span>
+              <span class="text-xs text-canela block">Transf. Cooperativa</span>
               <span id="arq-sys-coop" class="font-extrabold text-lg">0 Gs.</span>
             </div>
             <div class="bg-crema p-3 rounded-xl border border-amber-100">
+              <span class="text-xs text-canela block">Transf. Bancaria</span>
+              <span id="arq-sys-banco" class="font-extrabold text-lg">0 Gs.</span>
+            </div>
+            <div class="bg-crema p-3 rounded-xl border border-amber-100 col-span-2 sm:col-span-2">
               <span class="text-xs text-canela block">Ventas a Crédito (Fiado)</span>
               <span id="arq-sys-credito" class="font-extrabold text-lg">0 Gs.</span>
             </div>
@@ -326,8 +383,41 @@
         </div>
       </section>
 
+      <!-- 4B. FACTURACIÓN MENSUAL ACUMULADA (SOLO ADMIN) -->
+      <section id="tab-facturacion" class="tab-content hidden space-y-4">
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+          <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <div>
+              <h2 class="font-extrabold text-lg">📑 Facturas Únicas Acumuladas del Mes</h2>
+              <p class="text-xs text-canela">Compras marcadas en caja para consolidar en una sola factura legal por cliente a fin de mes</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="month" id="fact-month" class="border border-amber-200 rounded-xl px-3 py-2 text-sm font-bold" />
+              <button id="btn-export-facturas" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow">
+                📥 Descargar Excel Facturas a Emitir
+              </button>
+            </div>
+          </div>
+          <div id="facturacion-list" class="space-y-4"></div>
+        </div>
+      </section>
+
       <!-- 5. PRODUCTOS, INSUMOS Y RECETAS (SOLO ADMIN) -->
       <section id="tab-productos" class="tab-content hidden space-y-5">
+        <!-- Configuración de Tarifa de Delivery -->
+        <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-300 shadow-sm flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="font-extrabold text-base text-chocolate">🛵 Configuración de Tarifa de Delivery</h2>
+            <p class="text-xs text-canela">Este monto se sumará automáticamente en caja cuando el cajero tilde el servicio de delivery.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="number" id="cfg-delivery-price" value="10000" class="w-36 border-2 border-amber-300 rounded-xl px-3 py-2 font-extrabold text-sm bg-white text-right" />
+            <button type="button" id="btn-save-delivery-cfg" class="bg-chocolate hover:bg-black text-white font-bold px-4 py-2 rounded-xl text-xs">
+              💾 Guardar Tarifa
+            </button>
+          </div>
+        </div>
+
         <!-- Carga Rápida Directa (Almuerzos Listos / Reventa / Bebidas sin ingredientes) -->
         <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-sm">
           <h2 class="font-extrabold text-lg text-chocolate mb-1">🍱 Agregar Producto Fijo / Almuerzo Listo (Sin Ingredientes)</h2>
@@ -436,8 +526,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
-      getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc,
-      query, where, onSnapshot, serverTimestamp
+      getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc,
+      query, where, onSnapshot, serverTimestamp, arrayUnion
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -456,6 +546,7 @@
     let currentUser = null;
     let isAdmin = false;
     let selectedCaja = localStorage.getItem('deliciapp_caja') || 'Caja 1';
+    let deliveryPrice = 10000;
     let products = [];
     let clients = [];
     let cart = [];
@@ -463,12 +554,18 @@
     let lastReportSales = [];
     let lastRankingSorted = [];
     let lastCreditSales = [];
+    let lastMonthlyInvoices = [];
 
-    const DELIVERY_PRICE = 10000;
     const ADMIN_EMAIL = 'admin@deliciapp.com';
     const gs = (n) => Number(n || 0).toLocaleString('es-PY') + ' Gs.';
     const todayStr = () => new Date().toISOString().slice(0, 10);
     const currentMonthStr = () => new Date().toISOString().slice(0, 7);
+
+    function isLastDayOfMonth() {
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      return tomorrow.getDate() === 1;
+    }
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -522,6 +619,7 @@
         });
 
         initRealtimeData();
+        if (isAdmin) checkEndOfMonthInvoicesNotification();
       } else {
         currentUser = null;
         document.getElementById('login-screen').classList.remove('hidden');
@@ -544,11 +642,25 @@
 
         if (target === 'arqueo') loadArqueo();
         if (target === 'creditos' && isAdmin) loadCreditos();
+        if (target === 'facturacion' && isAdmin) loadFacturacionMensual();
         if (target === 'reportes' && isAdmin) loadReportes();
       });
     });
 
     function initRealtimeData() {
+      // Escuchar tarifa de delivery editable
+      onSnapshot(doc(db, 'config', 'general'), (snap) => {
+        if (snap.exists() && snap.data().deliveryPrice !== undefined) {
+          deliveryPrice = Number(snap.data().deliveryPrice);
+        } else {
+          deliveryPrice = 10000;
+        }
+        document.getElementById('pos-delivery-label').textContent = `+${gs(deliveryPrice)}`;
+        const cfgInput = document.getElementById('cfg-delivery-price');
+        if (cfgInput) cfgInput.value = deliveryPrice;
+        renderCart();
+      });
+
       onSnapshot(collection(db, 'productos'), (snap) => {
         products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderPOS();
@@ -558,11 +670,21 @@
       onSnapshot(collection(db, 'clientes'), (snap) => {
         clients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderClients();
+        updateCoopAccountsDropdown();
       });
 
       document.getElementById('cred-month').value = currentMonthStr();
+      document.getElementById('fact-month').value = currentMonthStr();
       document.getElementById('rep-date').value = todayStr();
     }
+
+    // Guardar tarifa de delivery (Admin)
+    document.getElementById('btn-save-delivery-cfg').addEventListener('click', async () => {
+      const val = Number(document.getElementById('cfg-delivery-price').value || 0);
+      if (val < 0) return alert('Ingresa un monto válido.');
+      await setDoc(doc(db, 'config', 'general'), { deliveryPrice: val }, { merge: true });
+      alert(`✅ Tarifa de delivery actualizada a ${gs(val)}.`);
+    });
 
     function renderPOS() {
       const search = document.getElementById('pos-search').value.toLowerCase();
@@ -611,7 +733,7 @@
     function getCartTotalWithDelivery() {
       const itemsTotal = cart.reduce((s, i) => s + i.precio * i.qty, 0);
       const hasDelivery = document.getElementById('pos-delivery').checked;
-      return itemsTotal + (hasDelivery ? DELIVERY_PRICE : 0);
+      return itemsTotal + (hasDelivery ? deliveryPrice : 0);
     }
 
     function renderCart() {
@@ -665,9 +787,58 @@
       renderCart();
     };
 
+    // Control de paneles según método de pago
     const payMethodEl = document.getElementById('pay-method');
     payMethodEl.addEventListener('change', () => {
-      document.getElementById('cash-helper').classList.toggle('hidden', payMethodEl.value !== 'Efectivo');
+      const m = payMethodEl.value;
+      document.getElementById('cash-helper').classList.toggle('hidden', m !== 'Efectivo');
+      document.getElementById('coop-helper').classList.toggle('hidden', m !== 'Transferencia Cooperativa');
+      document.getElementById('bank-helper').classList.toggle('hidden', m !== 'Transferencia Bancaria');
+      if (m === 'Transferencia Cooperativa') updateCoopAccountsDropdown();
+    });
+
+    // Actualizar selector de cuentas de cooperativa al cambiar de cliente
+    document.getElementById('pos-client').addEventListener('change', updateCoopAccountsDropdown);
+
+    function updateCoopAccountsDropdown() {
+      const clientId = document.getElementById('pos-client').value;
+      const clientObj = clients.find(c => c.id === clientId);
+      const sel = document.getElementById('coop-saved-select');
+      const newInput = document.getElementById('coop-new-account');
+      sel.innerHTML = '';
+
+      const cuentas = (clientObj && Array.isArray(clientObj.cuentasCoop)) ? clientObj.cuentasCoop : [];
+      cuentas.forEach(cta => {
+        const opt = document.createElement('option');
+        opt.value = cta;
+        opt.textContent = `✅ ${cta}`;
+        sel.appendChild(opt);
+      });
+
+      const optNew = document.createElement('option');
+      optNew.value = '__new__';
+      optNew.textContent = '+ Ingresar nueva cuenta de cooperativa...';
+      sel.appendChild(optNew);
+
+      if (cuentas.length > 0) {
+        sel.value = cuentas[0];
+        newInput.classList.add('hidden');
+      } else {
+        sel.value = '__new__';
+        newInput.classList.remove('hidden');
+      }
+    }
+
+    document.getElementById('coop-saved-select').addEventListener('change', (e) => {
+      document.getElementById('coop-new-account').classList.toggle('hidden', e.target.value !== '__new__');
+    });
+
+    // Evitar marcar ambos checkboxes de factura a la vez
+    document.getElementById('pos-factura').addEventListener('change', (e) => {
+      if (e.target.checked) document.getElementById('pos-acumular-factura').checked = false;
+    });
+    document.getElementById('pos-acumular-factura').addEventListener('change', (e) => {
+      if (e.target.checked) document.getElementById('pos-factura').checked = false;
     });
 
     function updateChange() {
@@ -688,6 +859,7 @@
       const metodoPago = payMethodEl.value;
       const clientId = document.getElementById('pos-client').value;
       const requiereFactura = document.getElementById('pos-factura').checked;
+      const acumularFacturaMes = document.getElementById('pos-acumular-factura').checked;
       const hasDelivery = document.getElementById('pos-delivery').checked;
       const clientObj = clients.find(c => c.id === clientId);
 
@@ -696,13 +868,38 @@
         if (!clientObj.habilitadoCredito) return alert('Este cliente no tiene habilitada la cuenta a crédito.');
       }
 
-      if (requiereFactura && !clientObj) {
-        return alert('Selecciona o registra el cliente con RUC y Denominación para emitir factura.');
+      if ((requiereFactura || acumularFacturaMes) && !clientObj) {
+        return alert('Selecciona o registra el cliente con RUC y Denominación para facturación.');
+      }
+
+      // Validación y guardado de cuenta de cooperativa
+      let referenciaPago = '';
+      if (metodoPago === 'Transferencia Cooperativa') {
+        const selVal = document.getElementById('coop-saved-select').value;
+        if (selVal === '__new__') {
+          const nuevaCta = document.getElementById('coop-new-account').value.trim();
+          if (!nuevaCta) return alert('Ingresa el número de cuenta de cooperativa del cliente.');
+          referenciaPago = nuevaCta;
+          if (clientObj) {
+            await updateDoc(doc(db, 'clientes', clientObj.id), {
+              cuentasCoop: arrayUnion(nuevaCta)
+            });
+          }
+        } else {
+          referenciaPago = selVal;
+        }
+      }
+
+      // Validación de transferencia bancaria
+      if (metodoPago === 'Transferencia Bancaria') {
+        const nroTrf = document.getElementById('bank-ref-input').value.trim();
+        if (!nroTrf) return alert('Ingresa el número de transferencia bancaria para validar el pago.');
+        referenciaPago = nroTrf;
       }
 
       const finalItems = cart.map(i => ({ id: i.id, nombre: i.nombre, qty: i.qty, precio: i.precio, costo: i.costo || 0 }));
       if (hasDelivery) {
-        finalItems.push({ id: 'delivery', nombre: 'Servicio de Delivery', qty: 1, precio: DELIVERY_PRICE, costo: 0 });
+        finalItems.push({ id: 'delivery', nombre: 'Servicio de Delivery', qty: 1, precio: deliveryPrice, costo: 0 });
       }
 
       const total = finalItems.reduce((s, i) => s + i.precio * i.qty, 0);
@@ -718,13 +915,17 @@
         cajero: currentUser.email,
         items: finalItems,
         conDelivery: hasDelivery,
+        deliveryMonto: hasDelivery ? deliveryPrice : 0,
         total,
         costoTotal,
         metodoPago,
+        referenciaPago,
         clienteId: clientObj ? clientObj.id : null,
         clienteNombre: clientObj ? clientObj.nombre : 'Consumidor Final',
         clienteRuc: clientObj ? clientObj.ruc : '',
         requiereFactura,
+        acumularFacturaMes,
+        facturaMensualEmitida: false,
         pagadoCredito: metodoPago !== 'Crédito'
       };
 
@@ -733,7 +934,10 @@
         alert(`✅ Pedido ${numeroPedido} registrado con éxito (${gs(total)} - ${metodoPago}).`);
         cart = [];
         document.getElementById('cash-received').value = '';
+        document.getElementById('coop-new-account').value = '';
+        document.getElementById('bank-ref-input').value = '';
         document.getElementById('pos-factura').checked = false;
+        document.getElementById('pos-acumular-factura').checked = false;
         document.getElementById('pos-delivery').checked = false;
         renderCart();
       } catch (e) {
@@ -746,9 +950,16 @@
       const nombre = document.getElementById('cli-nombre').value.trim();
       const ruc = document.getElementById('cli-ruc').value.trim();
       const tel = document.getElementById('cli-tel').value.trim();
+      const ctaCoop = document.getElementById('cli-coop-init').value.trim();
       const habilitadoCredito = document.getElementById('cli-credito').checked;
 
-      await addDoc(collection(db, 'clientes'), { nombre, ruc, tel, habilitadoCredito });
+      await addDoc(collection(db, 'clientes'), {
+        nombre,
+        ruc,
+        tel,
+        cuentasCoop: ctaCoop ? [ctaCoop] : [],
+        habilitadoCredito
+      });
       e.target.reset();
       alert('Cliente guardado correctamente.');
     });
@@ -757,6 +968,7 @@
       const search = (document.getElementById('cli-search')?.value || '').toLowerCase();
       const tbody = document.getElementById('clients-table');
       const select = document.getElementById('pos-client');
+      const prevSelected = select.value;
       tbody.innerHTML = '';
       select.innerHTML = '<option value="">-- Consumidor Final (Sin datos) --</option>';
 
@@ -767,39 +979,48 @@
         select.appendChild(opt);
 
         if (c.nombre.toLowerCase().includes(search) || c.ruc.toLowerCase().includes(search)) {
+          const ctasHtml = (c.cuentasCoop && c.cuentasCoop.length > 0)
+            ? c.cuentasCoop.map(ct => `<span class="inline-block bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded text-xs mr-1 mb-1">${ct}</span>`).join('')
+            : '<span class="text-xs text-gray-400">Sin cuentas</span>';
+
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td class="p-2.5 font-bold">${c.nombre}</td>
             <td class="p-2.5">${c.ruc}</td>
             <td class="p-2.5">${c.tel || '-'}</td>
+            <td class="p-2.5">${ctasHtml}</td>
             <td class="p-2.5">${c.habilitadoCredito ? '<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs font-bold">Habilitado</span>' : '<span class="text-xs text-gray-400">No</span>'}</td>
           `;
           tbody.appendChild(tr);
         }
       });
+
+      if (prevSelected) select.value = prevSelected;
     }
     document.getElementById('cli-search').addEventListener('input', renderClients);
 
-    let currentArqueoTotals = { efectivo: 0, qr: 0, coop: 0, credito: 0 };
+    let currentArqueoTotals = { efectivo: 0, qr: 0, coop: 0, banco: 0, credito: 0 };
 
     async function loadArqueo() {
       document.getElementById('arqueo-subtitle').textContent = `${selectedCaja} • Fecha: ${todayStr()} • Cajero: ${currentUser.email}`;
       const q = query(collection(db, 'ventas'), where('fecha', '==', todayStr()), where('caja', '==', selectedCaja));
       const snap = await getDocs(q);
 
-      let efectivo = 0, qr = 0, coop = 0, credito = 0;
+      let efectivo = 0, qr = 0, coop = 0, banco = 0, credito = 0;
       snap.forEach(d => {
         const v = d.data();
         if (v.metodoPago === 'Efectivo') efectivo += v.total;
         else if (v.metodoPago === 'QR Débito/Crédito') qr += v.total;
         else if (v.metodoPago === 'Transferencia Cooperativa') coop += v.total;
+        else if (v.metodoPago === 'Transferencia Bancaria') banco += v.total;
         else if (v.metodoPago === 'Crédito') credito += v.total;
       });
 
-      currentArqueoTotals = { efectivo, qr, coop, credito };
+      currentArqueoTotals = { efectivo, qr, coop, banco, credito };
       document.getElementById('arq-sys-efectivo').textContent = gs(efectivo);
       document.getElementById('arq-sys-qr').textContent = gs(qr);
       document.getElementById('arq-sys-coop').textContent = gs(coop);
+      document.getElementById('arq-sys-banco').textContent = gs(banco);
       document.getElementById('arq-sys-credito').textContent = gs(credito);
       calcArqueoDiff();
     }
@@ -921,6 +1142,146 @@
       const ws = XLSX.utils.json_to_sheet(rows);
       XLSX.utils.book_append_sheet(wb, ws, 'Creditos_Mes');
       XLSX.writeFile(wb, `DeliciApp_Creditos_${mes}.xlsx`);
+    });
+
+    // Notificación automática el último día del mes para facturas únicas acumuladas
+    async function checkEndOfMonthInvoicesNotification() {
+      if (!isLastDayOfMonth()) return;
+      const mes = currentMonthStr();
+      const q = query(collection(db, 'ventas'), where('mesAnio', '==', mes), where('acumularFacturaMes', '==', true));
+      const snap = await getDocs(q);
+
+      const pendingByClient = {};
+      snap.forEach(d => {
+        const v = d.data();
+        if (!v.facturaMensualEmitida) {
+          const key = v.clienteId || v.clienteNombre;
+          if (!pendingByClient[key]) pendingByClient[key] = { nombre: v.clienteNombre, ruc: v.clienteRuc, total: 0, count: 0 };
+          pendingByClient[key].total += v.total;
+          pendingByClient[key].count++;
+        }
+      });
+
+      const list = Object.values(pendingByClient);
+      if (list.length === 0) return;
+
+      const summaryEl = document.getElementById('eom-banner-summary');
+      summaryEl.innerHTML = list.map(c =>
+        `<p>• <strong>${c.nombre}</strong> (RUC: ${c.ruc || 'N/A'}) — ${c.count} compra(s): <strong>${gs(c.total)}</strong></p>`
+      ).join('');
+      document.getElementById('eom-banner').classList.remove('hidden');
+    }
+
+    document.getElementById('btn-go-facturacion').addEventListener('click', () => {
+      document.querySelector('[data-tab="facturacion"]').click();
+    });
+    document.getElementById('btn-dismiss-eom').addEventListener('click', () => {
+      document.getElementById('eom-banner').classList.add('hidden');
+    });
+
+    // Cargar pestaña de Facturación Mensual Acumulada
+    async function loadFacturacionMensual() {
+      const mes = document.getElementById('fact-month').value || currentMonthStr();
+      const q = query(collection(db, 'ventas'), where('mesAnio', '==', mes), where('acumularFacturaMes', '==', true));
+      const snap = await getDocs(q);
+      const container = document.getElementById('facturacion-list');
+      container.innerHTML = '';
+      lastMonthlyInvoices = [];
+
+      const grouped = {};
+      snap.forEach(docSnap => {
+        const v = { id: docSnap.id, ...docSnap.data() };
+        lastMonthlyInvoices.push(v);
+        const key = v.clienteId || v.clienteNombre;
+        if (!grouped[key]) grouped[key] = { nombre: v.clienteNombre, ruc: v.clienteRuc, ventas: [], totalPendiente: 0, totalGeneral: 0 };
+        grouped[key].ventas.push(v);
+        grouped[key].totalGeneral += v.total;
+        if (!v.facturaMensualEmitida) grouped[key].totalPendiente += v.total;
+      });
+
+      const keys = Object.keys(grouped);
+      if (keys.length === 0) {
+        container.innerHTML = '<p class="text-sm text-canela py-4">No hay compras acumuladas para factura única en este mes.</p>';
+        return;
+      }
+
+      keys.forEach(k => {
+        const g = grouped[k];
+        const pendingIds = g.ventas.filter(v => !v.facturaMensualEmitida).map(v => v.id);
+        const card = document.createElement('div');
+        card.className = 'border-2 border-amber-200 rounded-2xl p-4 bg-crema space-y-3';
+
+        const rowsHtml = g.ventas.map(v => {
+          const itemsTxt = v.items.map(i => `${i.qty}x ${i.nombre}`).join(', ');
+          return `
+            <tr class="border-t border-amber-100 text-xs">
+              <td class="py-1.5 font-mono">${v.fecha}</td>
+              <td class="py-1.5 font-bold">${v.numeroPedido}</td>
+              <td class="py-1.5">${v.metodoPago}</td>
+              <td class="py-1.5">${itemsTxt}</td>
+              <td class="py-1.5 font-bold">${gs(v.total)}</td>
+              <td class="py-1.5">${v.facturaMensualEmitida ? '<span class="text-green-700 font-bold">Facturado</span>' : '<span class="text-amber-700 font-bold">Pendiente</span>'}</td>
+            </tr>
+          `;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="flex flex-wrap justify-between items-center gap-2">
+            <div>
+              <h3 class="font-extrabold text-base text-chocolate">${g.nombre}</h3>
+              <p class="text-xs text-canela">RUC / C.I.: <strong>${g.ruc || 'N/A'}</strong> • Total Acumulado Mes: <strong>${gs(g.totalGeneral)}</strong></p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <span class="text-xs text-canela block">Monto a Facturar</span>
+                <span class="font-black text-lg text-terracota">${gs(g.totalPendiente)}</span>
+              </div>
+              ${pendingIds.length > 0
+                ? `<button class="btn-mark-invoiced bg-chocolate hover:bg-black text-white text-xs font-bold px-3 py-2 rounded-xl">✅ Marcar Factura Emitida</button>`
+                : '<span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-xl">✔ Factura Emitida</span>'}
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead><tr class="text-[11px] uppercase text-canela"><th>Fecha</th><th>Pedido</th><th>Pago</th><th>Detalle</th><th>Monto</th><th>Estado</th></tr></thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+
+        const btnInv = card.querySelector('.btn-mark-invoiced');
+        if (btnInv) {
+          btnInv.onclick = async () => {
+            if (!confirm(`¿Confirmar que ya se emitió la factura única para ${g.nombre} por ${gs(g.totalPendiente)}?`)) return;
+            for (const vid of pendingIds) {
+              await updateDoc(doc(db, 'ventas', vid), { facturaMensualEmitida: true });
+            }
+            loadFacturacionMensual();
+            checkEndOfMonthInvoicesNotification();
+          };
+        }
+        container.appendChild(card);
+      });
+    }
+    document.getElementById('fact-month').addEventListener('change', loadFacturacionMensual);
+
+    document.getElementById('btn-export-facturas').addEventListener('click', () => {
+      if (lastMonthlyInvoices.length === 0) return alert('No hay registros de facturación mensual para exportar.');
+      const mes = document.getElementById('fact-month').value || currentMonthStr();
+      const rows = lastMonthlyInvoices.map(v => ({
+        'Mes': mes,
+        'Fecha Compra': v.fecha,
+        'N° Pedido': v.numeroPedido,
+        'Cliente / Denominación': v.clienteNombre,
+        'RUC': v.clienteRuc || '',
+        'Método de Pago': v.metodoPago,
+        'Detalle Artículos': (v.items || []).map(i => `${i.qty}x ${i.nombre}`).join(', '),
+        'Monto (Gs.)': v.total,
+        'Estado Factura': v.facturaMensualEmitida ? 'Facturado' : 'Pendiente de Emitir'
+      }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Facturacion_Mensual');
+      XLSX.writeFile(wb, `DeliciApp_Facturas_Mensuales_${mes}.xlsx`);
     });
 
     function updateRecetaCalc() {
@@ -1080,9 +1441,10 @@
         'Cajero': v.cajero,
         'Cliente': v.clienteNombre,
         'RUC': v.clienteRuc || '',
-        'Solicita Factura': v.requiereFactura ? 'Sí' : 'No',
-        'Delivery': v.conDelivery ? 'Sí (10.000 Gs.)' : 'No',
+        'Facturación': v.requiereFactura ? 'Factura en el momento' : (v.acumularFacturaMes ? 'Acumulada Fin de Mes' : 'No'),
+        'Delivery': v.conDelivery ? `Sí (${gs(v.deliveryMonto || 10000)})` : 'No',
         'Método de Pago': v.metodoPago,
+        'N° Cuenta / Comprobante': v.referenciaPago || '',
         'Detalle Artículos': (v.items || []).map(i => `${i.qty}x ${i.nombre}`).join(', '),
         'Costo Total (Gs.)': v.costoTotal || 0,
         'Venta Total (Gs.)': v.total,
