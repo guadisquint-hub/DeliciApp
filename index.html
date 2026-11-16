@@ -8,7 +8,6 @@
   <link rel="icon" type="image/jpeg" href="./logo.jpg" />
   <meta name="theme-color" content="#C85A17" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Librería SheetJS para exportar archivos Excel (.xlsx) -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <script>
     tailwind.config = {
@@ -117,7 +116,6 @@
       <button data-tab="arqueo" class="tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         💰 Arqueo de Caja
       </button>
-      <!-- Pestañas Exclusivas de Administrador -->
       <button data-tab="creditos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         📒 Créditos del Mes
       </button>
@@ -136,10 +134,11 @@
       <section id="tab-pos" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div class="lg:col-span-2 space-y-4">
           <div class="flex flex-wrap gap-2 items-center justify-between bg-white p-3 rounded-2xl border border-amber-200 shadow-sm">
-            <input type="text" id="pos-search" placeholder="🔍 Buscar comida, bebida, dona..."
+            <input type="text" id="pos-search" placeholder="🔍 Buscar almuerzo, comida, bebida, dona..."
               class="flex-1 min-w-[200px] border border-amber-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-terracota" />
             <select id="pos-cat-filter" class="border border-amber-200 rounded-xl px-3 py-2 text-sm bg-crema font-medium">
               <option value="Todas">Todas las categorías</option>
+              <option value="Almuerzos">🍱 Almuerzos Listos</option>
               <option value="Comidas">Comidas / Salados</option>
               <option value="Dulces">Dulces / Panadería</option>
               <option value="Bebidas">Bebidas</option>
@@ -158,12 +157,21 @@
               <button id="btn-clear-cart" class="text-xs text-red-600 font-bold hover:underline">Vaciar</button>
             </div>
 
-            <div id="cart-items" class="space-y-2 max-h-60 overflow-y-auto mb-4">
+            <div id="cart-items" class="space-y-2 max-h-60 overflow-y-auto mb-3">
               <p class="text-sm text-canela text-center py-6">Selecciona productos para iniciar</p>
             </div>
           </div>
 
           <div class="border-t-2 border-amber-100 pt-3 space-y-3">
+            <!-- Opción Tildable de Delivery -->
+            <label class="flex items-center justify-between bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 px-3 py-2.5 rounded-xl cursor-pointer transition">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="pos-delivery" class="w-4 h-4 accent-terracota rounded" />
+                <span class="text-xs font-extrabold text-chocolate">🛵 Servicio de Delivery</span>
+              </div>
+              <span class="text-xs font-black text-terracota">+10.000 Gs.</span>
+            </label>
+
             <div class="flex justify-between items-center text-xl font-black text-chocolate">
               <span>TOTAL:</span>
               <span id="cart-total">0 Gs.</span>
@@ -320,9 +328,45 @@
 
       <!-- 5. PRODUCTOS, INSUMOS Y RECETAS (SOLO ADMIN) -->
       <section id="tab-productos" class="tab-content hidden space-y-5">
-        <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-sm space-y-4">
-          <h2 class="font-extrabold text-lg text-terracota">🧮 Calculadora de Costos por Tanda / Receta</h2>
-          <p class="text-xs text-canela">Calcula el costo real de tus insumos (harina, azúcar, manteca, etc.) dividido por las unidades que rinde la tanda.</p>
+        <!-- Carga Rápida Directa (Almuerzos Listos / Reventa / Bebidas sin ingredientes) -->
+        <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-sm">
+          <h2 class="font-extrabold text-lg text-chocolate mb-1">🍱 Agregar Producto Fijo / Almuerzo Listo (Sin Ingredientes)</h2>
+          <p class="text-xs text-canela mb-3">Ideal para almuerzos del día, platos listos, bebidas o productos de reventa directa. El costo es opcional.</p>
+          <form id="prod-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+            <input type="text" id="prod-nombre" required placeholder="Ej: Almuerzo Completo / Milanesa" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <select id="prod-cat" class="border border-amber-200 rounded-xl px-3 py-2 text-sm bg-crema font-medium">
+              <option value="Almuerzos">🍱 Almuerzos Listos</option>
+              <option value="Comidas">Comidas / Salados</option>
+              <option value="Dulces">Dulces / Panadería</option>
+              <option value="Bebidas">Bebidas</option>
+              <option value="Otros">Otros</option>
+            </select>
+            <input type="number" id="prod-costo" placeholder="Costo unit. opcional (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <input type="number" id="prod-precio" required placeholder="Precio venta (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <button type="submit" class="bg-terracota hover:bg-cobre text-white font-bold rounded-xl py-2 text-sm">+ Guardar Producto</button>
+          </form>
+
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-manteca">
+                <tr>
+                  <th class="p-2">Producto</th>
+                  <th class="p-2">Categoría</th>
+                  <th class="p-2">Costo Unit.</th>
+                  <th class="p-2">Precio Venta</th>
+                  <th class="p-2">Ganancia</th>
+                  <th class="p-2">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-table" class="divide-y divide-amber-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Calculadora de Recetas por Tanda -->
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm space-y-4">
+          <h3 class="font-extrabold text-base text-terracota">🧮 Calculadora de Costos por Tanda / Receta (Opcional)</h3>
+          <p class="text-xs text-canela">Usa esta herramienta solo cuando quieras calcular el costo de insumos (harina, azúcar, manteca) dividido por las unidades que rinde la tanda.</p>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <input type="text" id="rec-nombre" placeholder="Nombre preparación (Ej: Donas Glaseadas)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
@@ -346,41 +390,9 @@
               <p>Costo por Unidad: <strong id="rec-costo-unit" class="text-terracota text-sm">0 Gs.</strong></p>
               <p>Ganancia Neta por Unidad: <strong id="rec-ganancia-unit" class="text-green-700 text-sm">0 Gs.</strong></p>
             </div>
-            <button type="button" id="btn-save-receta-producto" class="bg-terracota hover:bg-cobre text-white font-bold px-4 py-2.5 rounded-xl text-sm">
+            <button type="button" id="btn-save-receta-producto" class="bg-chocolate hover:bg-black text-white font-bold px-4 py-2.5 rounded-xl text-sm">
               💾 Guardar Producto con este Costo
             </button>
-          </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
-          <h3 class="font-extrabold text-base mb-3">Agregar / Editar Producto Directo (Reventa / Bebidas)</h3>
-          <form id="prod-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-            <input type="text" id="prod-nombre" required placeholder="Nombre del producto" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
-            <select id="prod-cat" class="border border-amber-200 rounded-xl px-3 py-2 text-sm bg-crema">
-              <option value="Comidas">Comidas</option>
-              <option value="Dulces">Dulces</option>
-              <option value="Bebidas">Bebidas</option>
-              <option value="Otros">Otros</option>
-            </select>
-            <input type="number" id="prod-costo" required placeholder="Costo unitario (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
-            <input type="number" id="prod-precio" required placeholder="Precio venta (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
-            <button type="submit" class="bg-chocolate text-white font-bold rounded-xl py-2 text-sm">+ Guardar Producto</button>
-          </form>
-
-          <div class="mt-4 overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-manteca">
-                <tr>
-                  <th class="p-2">Producto</th>
-                  <th class="p-2">Categoría</th>
-                  <th class="p-2">Costo Unit.</th>
-                  <th class="p-2">Precio Venta</th>
-                  <th class="p-2">Ganancia</th>
-                  <th class="p-2">Acción</th>
-                </tr>
-              </thead>
-              <tbody id="admin-products-table" class="divide-y divide-amber-100"></tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -452,6 +464,7 @@
     let lastRankingSorted = [];
     let lastCreditSales = [];
 
+    const DELIVERY_PRICE = 10000;
     const ADMIN_EMAIL = 'admin@deliciapp.com';
     const gs = (n) => Number(n || 0).toLocaleString('es-PY') + ' Gs.';
     const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -595,19 +608,23 @@
       renderCart();
     }
 
+    function getCartTotalWithDelivery() {
+      const itemsTotal = cart.reduce((s, i) => s + i.precio * i.qty, 0);
+      const hasDelivery = document.getElementById('pos-delivery').checked;
+      return itemsTotal + (hasDelivery ? DELIVERY_PRICE : 0);
+    }
+
     function renderCart() {
       const container = document.getElementById('cart-items');
       if (cart.length === 0) {
         container.innerHTML = '<p class="text-sm text-canela text-center py-6">Selecciona productos para iniciar</p>';
-        document.getElementById('cart-total').textContent = '0 Gs.';
+        document.getElementById('cart-total').textContent = gs(getCartTotalWithDelivery());
         updateChange();
         return;
       }
 
       container.innerHTML = '';
-      let total = 0;
       cart.forEach((item, idx) => {
-        total += item.precio * item.qty;
         const row = document.createElement('div');
         row.className = 'flex items-center justify-between bg-crema p-2 rounded-xl border border-amber-100 text-xs';
         row.innerHTML = `
@@ -633,11 +650,20 @@
         container.appendChild(row);
       });
 
-      document.getElementById('cart-total').textContent = gs(total);
+      document.getElementById('cart-total').textContent = gs(getCartTotalWithDelivery());
       updateChange();
     }
 
-    document.getElementById('btn-clear-cart').onclick = () => { cart = []; renderCart(); };
+    document.getElementById('pos-delivery').addEventListener('change', () => {
+      document.getElementById('cart-total').textContent = gs(getCartTotalWithDelivery());
+      updateChange();
+    });
+
+    document.getElementById('btn-clear-cart').onclick = () => {
+      cart = [];
+      document.getElementById('pos-delivery').checked = false;
+      renderCart();
+    };
 
     const payMethodEl = document.getElementById('pay-method');
     payMethodEl.addEventListener('change', () => {
@@ -645,7 +671,7 @@
     });
 
     function updateChange() {
-      const total = cart.reduce((s, i) => s + i.precio * i.qty, 0);
+      const total = getCartTotalWithDelivery();
       const rec = Number(document.getElementById('cash-received').value || 0);
       const change = rec > total ? rec - total : 0;
       document.getElementById('cash-change').textContent = gs(change);
@@ -662,6 +688,7 @@
       const metodoPago = payMethodEl.value;
       const clientId = document.getElementById('pos-client').value;
       const requiereFactura = document.getElementById('pos-factura').checked;
+      const hasDelivery = document.getElementById('pos-delivery').checked;
       const clientObj = clients.find(c => c.id === clientId);
 
       if (metodoPago === 'Crédito') {
@@ -673,8 +700,13 @@
         return alert('Selecciona o registra el cliente con RUC y Denominación para emitir factura.');
       }
 
-      const total = cart.reduce((s, i) => s + i.precio * i.qty, 0);
-      const costoTotal = cart.reduce((s, i) => s + (i.costo || 0) * i.qty, 0);
+      const finalItems = cart.map(i => ({ id: i.id, nombre: i.nombre, qty: i.qty, precio: i.precio, costo: i.costo || 0 }));
+      if (hasDelivery) {
+        finalItems.push({ id: 'delivery', nombre: 'Servicio de Delivery', qty: 1, precio: DELIVERY_PRICE, costo: 0 });
+      }
+
+      const total = finalItems.reduce((s, i) => s + i.precio * i.qty, 0);
+      const costoTotal = finalItems.reduce((s, i) => s + (i.costo || 0) * i.qty, 0);
       const numeroPedido = 'PED-' + Date.now().toString().slice(-6);
 
       const ventaData = {
@@ -684,7 +716,8 @@
         timestamp: serverTimestamp(),
         caja: selectedCaja,
         cajero: currentUser.email,
-        items: cart.map(i => ({ id: i.id, nombre: i.nombre, qty: i.qty, precio: i.precio, costo: i.costo || 0 })),
+        items: finalItems,
+        conDelivery: hasDelivery,
         total,
         costoTotal,
         metodoPago,
@@ -701,6 +734,7 @@
         cart = [];
         document.getElementById('cash-received').value = '';
         document.getElementById('pos-factura').checked = false;
+        document.getElementById('pos-delivery').checked = false;
         renderCart();
       } catch (e) {
         alert('Error al guardar la venta: ' + e.message);
@@ -869,7 +903,6 @@
     }
     document.getElementById('cred-month').addEventListener('change', loadCreditos);
 
-    // Exportar Excel Créditos del Mes
     document.getElementById('btn-export-creditos').addEventListener('click', () => {
       if (lastCreditSales.length === 0) return alert('No hay datos de créditos en este mes para exportar.');
       const mes = document.getElementById('cred-month').value || currentMonthStr();
@@ -1036,7 +1069,6 @@
     }
     document.getElementById('rep-date').addEventListener('change', loadReportes);
 
-    // Exportar Excel Ventas y Ranking del Día
     document.getElementById('btn-export-reporte').addEventListener('click', () => {
       if (lastReportSales.length === 0) return alert('No hay ventas en esta fecha para exportar.');
       const fecha = document.getElementById('rep-date').value || todayStr();
@@ -1049,6 +1081,7 @@
         'Cliente': v.clienteNombre,
         'RUC': v.clienteRuc || '',
         'Solicita Factura': v.requiereFactura ? 'Sí' : 'No',
+        'Delivery': v.conDelivery ? 'Sí (10.000 Gs.)' : 'No',
         'Método de Pago': v.metodoPago,
         'Detalle Artículos': (v.items || []).map(i => `${i.qty}x ${i.nombre}`).join(', '),
         'Costo Total (Gs.)': v.costoTotal || 0,
