@@ -43,23 +43,24 @@
       <div class="flex flex-col items-center mb-6">
         <img src="./logo.jpg" alt="Delicias Artesanales" class="w-36 h-36 object-contain rounded-full shadow-md border-4 border-amber-100 mb-3" />
         <h1 class="text-2xl font-extrabold text-chocolate">DeliciApp</h1>
-        <p class="text-sm text-canela">Sistema de Cantina & Punto de Venta</p>
+        <p class="text-sm text-canela">Sistema de Cantina, Despacho & Stock</p>
       </div>
 
       <form id="login-form" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold uppercase text-canela mb-1">Seleccionar Caja / Puesto</label>
+          <label class="block text-xs font-bold uppercase text-canela mb-1">Seleccionar Puesto / Área</label>
           <select id="login-caja" class="w-full border-2 border-amber-200 rounded-xl px-3 py-2.5 bg-crema font-semibold focus:outline-none focus:border-terracota">
             <option value="Caja 1">Caja 1 (Mostrador Principal)</option>
             <option value="Caja 2">Caja 2 (Apoyo / Rápida)</option>
             <option value="Caja 3">Caja 3 (Eventos / Patio)</option>
+            <option value="Despacho">Área de Despacho / Entrega</option>
             <option value="Administración">Administración Central</option>
           </select>
         </div>
 
         <div>
           <label class="block text-xs font-bold uppercase text-canela mb-1">Usuario (Correo)</label>
-          <input type="email" id="login-email" required placeholder="caja1@deliciapp.com"
+          <input type="email" id="login-email" required placeholder="caja1@deliciapp.com o despacho1@deliciapp.com"
             class="w-full border-2 border-amber-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-terracota" />
         </div>
 
@@ -126,13 +127,17 @@
 
     <!-- Navegación por Pestañas -->
     <nav class="bg-manteca border-b border-amber-200 px-3 py-2 flex gap-2 overflow-x-auto">
-      <button data-tab="pos" class="tab-btn active-tab px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-terracota text-white">
+      <button data-tab="pos" class="cashier-admin-only tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-terracota text-white">
         🛒 Punto de Venta
       </button>
-      <button data-tab="clientes" class="tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+      <button data-tab="despacho" class="tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200 flex items-center gap-1.5">
+        <span>📦 Despacho</span>
+        <span id="despacho-pending-badge" class="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded-full">0</span>
+      </button>
+      <button data-tab="clientes" class="cashier-admin-only tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         🧾 Clientes y RUC
       </button>
-      <button data-tab="arqueo" class="tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+      <button data-tab="arqueo" class="cashier-admin-only tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         💰 Arqueo de Caja
       </button>
       <button data-tab="creditos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
@@ -142,7 +147,7 @@
         📑 Facturación Mensual
       </button>
       <button data-tab="productos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
-        🍩 Productos y Recetas
+        🍩 Productos, Stock y Recetas
       </button>
       <button data-tab="reportes" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         📊 Ranking y Ventas
@@ -156,14 +161,16 @@
       <section id="tab-pos" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div class="lg:col-span-2 space-y-4">
           <div class="flex flex-wrap gap-2 items-center justify-between bg-white p-3 rounded-2xl border border-amber-200 shadow-sm">
-            <input type="text" id="pos-search" placeholder="🔍 Buscar almuerzo, comida, bebida, dona..."
+            <input type="text" id="pos-search" placeholder="🔍 Buscar almuerzo, gaseosa, agua, helado, snack..."
               class="flex-1 min-w-[200px] border border-amber-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-terracota" />
             <select id="pos-cat-filter" class="border border-amber-200 rounded-xl px-3 py-2 text-sm bg-crema font-medium">
               <option value="Todas">Todas las categorías</option>
               <option value="Almuerzos">🍱 Almuerzos Listos</option>
               <option value="Comidas">Comidas / Salados</option>
               <option value="Dulces">Dulces / Panadería</option>
-              <option value="Bebidas">Bebidas</option>
+              <option value="Bebidas">🥤 Bebidas (Botella/Lata/Agua)</option>
+              <option value="Helados">🍦 Helados</option>
+              <option value="Snacks">🍿 Snacks</option>
               <option value="Otros">Otros</option>
             </select>
           </div>
@@ -266,9 +273,29 @@
             </div>
 
             <button id="btn-checkout" class="w-full bg-terracota hover:bg-cobre text-white font-extrabold py-3.5 rounded-xl shadow-lg text-base transition">
-              ✅ Confirmar y Cobrar
+              ✅ Confirmar Pago y Enviar a Despacho
             </button>
           </div>
+        </div>
+      </section>
+
+      <!-- 1B. DESPACHO DE PEDIDOS (ADMIN, CAJEROS Y DESPACHADORES) -->
+      <section id="tab-despacho" class="tab-content hidden space-y-5">
+        <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-sm">
+          <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+            <div>
+              <h2 class="font-extrabold text-lg text-chocolate">📦 Órdenes Pendientes de Entrega (En Vivo)</h2>
+              <p class="text-xs text-canela">Los pedidos aparecen automáticamente apenas la caja confirma el pago.</p>
+            </div>
+            <span class="text-xs font-bold bg-amber-100 text-chocolate px-3 py-1.5 rounded-xl">Sincronización en tiempo real</span>
+          </div>
+
+          <div id="despacho-pendientes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+          <h3 class="font-extrabold text-base text-canela mb-3">✅ Últimos Pedidos Entregados Hoy</h3>
+          <div id="despacho-entregados-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
       </section>
 
@@ -402,7 +429,7 @@
         </div>
       </section>
 
-      <!-- 5. PRODUCTOS, INSUMOS Y RECETAS (SOLO ADMIN) -->
+      <!-- 5. PRODUCTOS, STOCK, INSUMOS Y RECETAS (SOLO ADMIN) -->
       <section id="tab-productos" class="tab-content hidden space-y-5">
         <!-- Configuración de Tarifa de Delivery -->
         <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-300 shadow-sm flex flex-wrap items-center justify-between gap-3">
@@ -418,24 +445,43 @@
           </div>
         </div>
 
-        <!-- Carga Rápida Directa (Almuerzos Listos / Reventa / Bebidas sin ingredientes) -->
+        <!-- Carga y Edición de Productos (Almuerzos, Bebidas, Helados, Snacks) -->
         <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-sm">
-          <h2 class="font-extrabold text-lg text-chocolate mb-1">🍱 Agregar Producto Fijo / Almuerzo Listo (Sin Ingredientes)</h2>
-          <p class="text-xs text-canela mb-3">Ideal para almuerzos del día, platos listos, bebidas o productos de reventa directa. El costo es opcional.</p>
-          <form id="prod-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-            <input type="text" id="prod-nombre" required placeholder="Ej: Almuerzo Completo / Milanesa" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+          <div class="flex justify-between items-center mb-1">
+            <h2 id="prod-form-title" class="font-extrabold text-lg text-chocolate">🍱 Agregar / Editar Producto (Almuerzos, Bebidas, Helados, Snacks)</h2>
+            <button type="button" id="btn-cancel-edit-prod" class="hidden text-xs bg-red-100 text-red-700 font-bold px-3 py-1 rounded-lg">Cancelar Edición</button>
+          </div>
+          <p class="text-xs text-canela mb-3">Carga productos con costo de compra y stock inicial (para bebidas en botella/lata, agua, helados y snacks) o sin stock fijo (para almuerzos del día).</p>
+
+          <form id="prod-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
+            <input type="hidden" id="prod-edit-id" value="" />
+            <input type="text" id="prod-nombre" required placeholder="Ej: Coca-Cola 500ml / Almuerzo" class="border border-amber-200 rounded-xl px-3 py-2 text-sm md:col-span-2" />
             <select id="prod-cat" class="border border-amber-200 rounded-xl px-3 py-2 text-sm bg-crema font-medium">
               <option value="Almuerzos">🍱 Almuerzos Listos</option>
+              <option value="Bebidas">🥤 Bebidas (Botella/Lata/Agua)</option>
+              <option value="Helados">🍦 Helados</option>
+              <option value="Snacks">🍿 Snacks</option>
               <option value="Comidas">Comidas / Salados</option>
               <option value="Dulces">Dulces / Panadería</option>
-              <option value="Bebidas">Bebidas</option>
               <option value="Otros">Otros</option>
             </select>
-            <input type="number" id="prod-costo" placeholder="Costo unit. opcional (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
+            <input type="number" id="prod-costo" placeholder="Costo compra (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
             <input type="number" id="prod-precio" required placeholder="Precio venta (Gs.)" class="border border-amber-200 rounded-xl px-3 py-2 text-sm" />
-            <button type="submit" class="bg-terracota hover:bg-cobre text-white font-bold rounded-xl py-2 text-sm">+ Guardar Producto</button>
+            <div class="flex flex-col justify-center">
+              <label class="flex items-center gap-1.5 text-xs font-bold text-chocolate cursor-pointer mb-1">
+                <input type="checkbox" id="prod-control-stock" class="w-4 h-4 accent-terracota" />
+                Controlar Stock
+              </label>
+              <input type="number" id="prod-stock-inicial" placeholder="Stock actual (unid.)" class="border border-amber-200 rounded-lg px-2 py-1 text-xs" />
+            </div>
+            <div class="md:col-span-6 flex justify-end">
+              <button type="submit" id="btn-submit-prod" class="bg-terracota hover:bg-cobre text-white font-bold rounded-xl px-5 py-2.5 text-sm shadow">
+                + Guardar Producto
+              </button>
+            </div>
           </form>
 
+          <!-- Tabla de Productos y Stock -->
           <div class="mt-4 overflow-x-auto">
             <table class="w-full text-left text-sm">
               <thead class="bg-manteca">
@@ -445,11 +491,61 @@
                   <th class="p-2">Costo Unit.</th>
                   <th class="p-2">Precio Venta</th>
                   <th class="p-2">Ganancia</th>
-                  <th class="p-2">Acción</th>
+                  <th class="p-2">Stock Disponible</th>
+                  <th class="p-2">Acciones</th>
                 </tr>
               </thead>
               <tbody id="admin-products-table" class="divide-y divide-amber-100"></tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- GESTIÓN DE INVENTARIO: INGRESO POR FACTURA DE COMPRA Y BAJAS POR CONSUMO / PÉRDIDA -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Ingreso de Compra con Factura -->
+          <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-200 shadow-sm space-y-3">
+            <h3 class="font-extrabold text-base text-emerald-950">📥 Ingresar Compra al Stock (Con Factura)</h3>
+            <p class="text-xs text-emerald-800">Suma unidades recibidas de proveedores (bebidas, helados, snacks) y actualiza su costo si varió.</p>
+            <form id="stock-in-form" class="space-y-2.5">
+              <select id="stock-in-prod" required class="w-full border border-emerald-300 rounded-xl px-3 py-2 text-sm bg-white font-semibold">
+                <option value="">-- Seleccionar Producto --</option>
+              </select>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="stock-in-factura" required placeholder="N° Factura Compra (Ej: 001-001-004521)" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white" />
+                <input type="number" id="stock-in-qty" required min="1" placeholder="Cantidad que entra (unid.)" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white font-bold" />
+              </div>
+              <div class="flex gap-2">
+                <input type="number" id="stock-in-costo" placeholder="Nuevo costo unitario (opcional Gs.)" class="flex-1 border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white" />
+                <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl text-xs shadow">
+                  + Sumar al Stock
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Baja / Descuento por Consumo Interno o Pérdida -->
+          <div class="bg-red-50 p-4 rounded-2xl border-2 border-red-200 shadow-sm space-y-3">
+            <h3 class="font-extrabold text-base text-red-950">📤 Restar Stock (Consumo Interno / Pérdida)</h3>
+            <p class="text-xs text-red-800">Descuenta unidades del inventario por consumo del personal, vencimiento o rotura.</p>
+            <form id="stock-out-form" class="space-y-2.5">
+              <select id="stock-out-prod" required class="w-full border border-red-300 rounded-xl px-3 py-2 text-sm bg-white font-semibold">
+                <option value="">-- Seleccionar Producto --</option>
+              </select>
+              <div class="grid grid-cols-2 gap-2">
+                <select id="stock-out-motivo" class="border border-red-300 rounded-xl px-3 py-2 text-xs bg-white font-semibold">
+                  <option value="Consumo Interno">Consumo Interno</option>
+                  <option value="Pérdida / Vencimiento">Pérdida / Vencimiento</option>
+                  <option value="Rotura / Daño">Rotura / Daño</option>
+                </select>
+                <input type="number" id="stock-out-qty" required min="1" placeholder="Cantidad a restar (unid.)" class="border border-red-300 rounded-xl px-3 py-2 text-xs bg-white font-bold" />
+              </div>
+              <div class="flex gap-2">
+                <input type="text" id="stock-out-obs" placeholder="Detalle / Observación (opcional)" class="flex-1 border border-red-300 rounded-xl px-3 py-2 text-xs bg-white" />
+                <button type="submit" class="bg-red-700 hover:bg-red-800 text-white font-bold px-4 py-2 rounded-xl text-xs shadow">
+                  - Descontar Stock
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -527,7 +623,7 @@
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc,
-      query, where, onSnapshot, serverTimestamp, arrayUnion
+      query, where, onSnapshot, serverTimestamp, arrayUnion, increment
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -545,6 +641,7 @@
 
     let currentUser = null;
     let isAdmin = false;
+    let isDespachoOnly = false;
     let selectedCaja = localStorage.getItem('deliciapp_caja') || 'Caja 1';
     let deliveryPrice = 10000;
     let products = [];
@@ -607,19 +704,37 @@
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
-        isAdmin = user.email.toLowerCase() === ADMIN_EMAIL;
+        const emailLower = user.email.toLowerCase();
+        isAdmin = emailLower === ADMIN_EMAIL;
+        isDespachoOnly = emailLower.startsWith('despacho');
+
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-screen').classList.remove('hidden');
-        document.getElementById('badge-caja').textContent = selectedCaja;
-        document.getElementById('badge-rol').textContent = isAdmin ? 'Administrador' : 'Cajero';
+
+        if (isDespachoOnly) {
+          document.getElementById('badge-caja').textContent = 'Área de Despacho';
+          document.getElementById('badge-rol').textContent = 'Despachador';
+        } else {
+          document.getElementById('badge-caja').textContent = selectedCaja;
+          document.getElementById('badge-rol').textContent = isAdmin ? 'Administrador' : 'Cajero';
+        }
         document.getElementById('user-display').textContent = user.email;
 
         document.querySelectorAll('.admin-only').forEach(el => {
           el.classList.toggle('hidden', !isAdmin);
         });
+        document.querySelectorAll('.cashier-admin-only').forEach(el => {
+          el.classList.toggle('hidden', isDespachoOnly);
+        });
 
         initRealtimeData();
-        if (isAdmin) checkEndOfMonthInvoicesNotification();
+
+        if (isDespachoOnly) {
+          document.querySelector('[data-tab="despacho"]').click();
+        } else {
+          document.querySelector('[data-tab="pos"]').click();
+          if (isAdmin) checkEndOfMonthInvoicesNotification();
+        }
       } else {
         currentUser = null;
         document.getElementById('login-screen').classList.remove('hidden');
@@ -661,21 +776,105 @@
         renderCart();
       });
 
+      // Escuchar productos y stock en vivo
       onSnapshot(collection(db, 'productos'), (snap) => {
         products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderPOS();
-        if (isAdmin) renderAdminProducts();
+        if (isAdmin) {
+          renderAdminProducts();
+          populateStockDropdowns();
+        }
       });
 
+      // Escuchar clientes en vivo
       onSnapshot(collection(db, 'clientes'), (snap) => {
         clients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderClients();
         updateCoopAccountsDropdown();
       });
 
+      // Escuchar pedidos del día en vivo para la cola de Despacho
+      const qHoy = query(collection(db, 'ventas'), where('fecha', '==', todayStr()));
+      onSnapshot(qHoy, (snap) => {
+        const ventasHoy = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderDespacho(ventasHoy);
+      });
+
       document.getElementById('cred-month').value = currentMonthStr();
       document.getElementById('fact-month').value = currentMonthStr();
       document.getElementById('rep-date').value = todayStr();
+    }
+
+    // Renderizar cola de Despacho (Pendientes y Entregados hoy)
+    function renderDespacho(ventasHoy) {
+      const pendientes = ventasHoy
+        .filter(v => (v.estadoEntrega || 'pendiente') === 'pendiente')
+        .sort((a, b) => (a.numeroPedido || '').localeCompare(b.numeroPedido || ''));
+
+      const entregados = ventasHoy
+        .filter(v => v.estadoEntrega === 'entregado')
+        .sort((a, b) => (b.numeroPedido || '').localeCompare(a.numeroPedido || ''));
+
+      document.getElementById('despacho-pending-badge').textContent = pendientes.length;
+
+      const pendGrid = document.getElementById('despacho-pendientes-grid');
+      if (pendientes.length === 0) {
+        pendGrid.innerHTML = '<p class="col-span-full text-center text-sm text-canela py-8">🎉 No hay órdenes pendientes de entrega en este momento.</p>';
+      } else {
+        pendGrid.innerHTML = '';
+        pendientes.forEach(v => {
+          const card = document.createElement('div');
+          card.className = 'border-2 border-terracota bg-crema rounded-2xl p-4 shadow-md flex flex-col justify-between space-y-3';
+          const itemsList = (v.items || [])
+            .filter(i => i.id !== 'delivery')
+            .map(i => `<li class="flex justify-between text-sm font-bold text-chocolate border-b border-amber-100 py-1"><span>${i.qty}x ${i.nombre}</span></li>`)
+            .join('');
+
+          card.innerHTML = `
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="bg-chocolate text-white text-xs font-black px-2.5 py-1 rounded-lg">${v.numeroPedido}</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full ${v.conDelivery ? 'bg-red-100 text-red-800' : 'bg-amber-200 text-chocolate'}">
+                  ${v.conDelivery ? '🛵 DELIVERY' : '🏪 MOSTRADOR'}
+                </span>
+              </div>
+              <p class="text-xs text-canela mb-2">Origen: <strong>${v.caja}</strong> • Cliente: <strong>${v.clienteNombre}</strong></p>
+              <ul class="bg-white rounded-xl p-2.5 border border-amber-200 space-y-1">
+                ${itemsList}
+              </ul>
+            </div>
+            <button class="btn-entregar w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-2.5 rounded-xl text-sm shadow transition">
+              ✅ Marcar Pedido Entregado
+            </button>
+          `;
+          card.querySelector('.btn-entregar').onclick = async () => {
+            await updateDoc(doc(db, 'ventas', v.id), {
+              estadoEntrega: 'entregado',
+              despachadoPor: currentUser.email,
+              horaEntrega: new Date().toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit' })
+            });
+          };
+          pendGrid.appendChild(card);
+        });
+      }
+
+      const entList = document.getElementById('despacho-entregados-list');
+      if (entregados.length === 0) {
+        entList.innerHTML = '<p class="col-span-full text-xs text-canela">Aún no hay pedidos marcados como entregados hoy.</p>';
+      } else {
+        entList.innerHTML = entregados.slice(0, 12).map(v => {
+          const itemsTxt = (v.items || []).filter(i => i.id !== 'delivery').map(i => `${i.qty}x ${i.nombre}`).join(', ');
+          return `
+            <div class="bg-crema border border-amber-200 rounded-xl p-3 text-xs">
+              <div class="flex justify-between font-bold text-chocolate mb-1">
+                <span>${v.numeroPedido} • ${v.clienteNombre}</span>
+                <span class="text-emerald-700">✔ ${v.horaEntrega || 'Entregado'}</span>
+              </div>
+              <p class="text-canela">${itemsTxt}</p>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     // Guardar tarifa de delivery (Admin)
@@ -703,16 +902,28 @@
       }
 
       filtered.forEach(p => {
+        const hasStockControl = Boolean(p.controlarStock);
+        const stockVal = Number(p.stock || 0);
+        const sinStock = hasStockControl && stockVal <= 0;
+
         const card = document.createElement('button');
-        card.className = 'bg-white hover:bg-manteca border-2 border-amber-200 rounded-2xl p-3 text-left shadow-sm transition flex flex-col justify-between';
+        card.disabled = sinStock;
+        card.className = `border-2 rounded-2xl p-3 text-left shadow-sm transition flex flex-col justify-between ${
+          sinStock
+            ? 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'
+            : 'bg-white hover:bg-manteca border-amber-200'
+        }`;
         card.innerHTML = `
           <div>
-            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 text-canela">${p.categoria}</span>
+            <div class="flex justify-between items-center gap-1">
+              <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 text-canela">${p.categoria}</span>
+              ${hasStockControl ? `<span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded ${stockVal <= 3 ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">Stock: ${stockVal}</span>` : ''}
+            </div>
             <h3 class="font-bold text-sm text-chocolate mt-1.5 leading-snug">${p.nombre}</h3>
           </div>
-          <p class="font-black text-terracota text-base mt-3">${gs(p.precio)}</p>
+          <p class="font-black text-terracota text-base mt-3">${sinStock ? 'AGOTADO' : gs(p.precio)}</p>
         `;
-        card.onclick = () => addToCart(p);
+        if (!sinStock) card.onclick = () => addToCart(p);
         grid.appendChild(card);
       });
     }
@@ -722,10 +933,23 @@
 
     function addToCart(prod) {
       const existing = cart.find(i => i.id === prod.id);
+      if (prod.controlarStock) {
+        const currentQty = existing ? existing.qty : 0;
+        if (currentQty + 1 > Number(prod.stock || 0)) {
+          return alert(`Stock insuficiente para "${prod.nombre}". Disponible: ${prod.stock} unid.`);
+        }
+      }
       if (existing) {
         existing.qty++;
       } else {
-        cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, costo: prod.costo || 0, qty: 1 });
+        cart.push({
+          id: prod.id,
+          nombre: prod.nombre,
+          precio: prod.precio,
+          costo: prod.costo || 0,
+          controlarStock: Boolean(prod.controlarStock),
+          qty: 1
+        });
       }
       renderCart();
     }
@@ -766,6 +990,10 @@
           renderCart();
         };
         row.querySelector('[data-act="inc"]').onclick = () => {
+          const prodLive = products.find(p => p.id === item.id);
+          if (prodLive && prodLive.controlarStock && item.qty + 1 > Number(prodLive.stock || 0)) {
+            return alert(`No hay más stock disponible de ${item.nombre}.`);
+          }
           item.qty++;
           renderCart();
         };
@@ -787,7 +1015,6 @@
       renderCart();
     };
 
-    // Control de paneles según método de pago
     const payMethodEl = document.getElementById('pay-method');
     payMethodEl.addEventListener('change', () => {
       const m = payMethodEl.value;
@@ -797,7 +1024,6 @@
       if (m === 'Transferencia Cooperativa') updateCoopAccountsDropdown();
     });
 
-    // Actualizar selector de cuentas de cooperativa al cambiar de cliente
     document.getElementById('pos-client').addEventListener('change', updateCoopAccountsDropdown);
 
     function updateCoopAccountsDropdown() {
@@ -833,7 +1059,6 @@
       document.getElementById('coop-new-account').classList.toggle('hidden', e.target.value !== '__new__');
     });
 
-    // Evitar marcar ambos checkboxes de factura a la vez
     document.getElementById('pos-factura').addEventListener('change', (e) => {
       if (e.target.checked) document.getElementById('pos-acumular-factura').checked = false;
     });
@@ -872,7 +1097,6 @@
         return alert('Selecciona o registra el cliente con RUC y Denominación para facturación.');
       }
 
-      // Validación y guardado de cuenta de cooperativa
       let referenciaPago = '';
       if (metodoPago === 'Transferencia Cooperativa') {
         const selVal = document.getElementById('coop-saved-select').value;
@@ -890,7 +1114,6 @@
         }
       }
 
-      // Validación de transferencia bancaria
       if (metodoPago === 'Transferencia Bancaria') {
         const nroTrf = document.getElementById('bank-ref-input').value.trim();
         if (!nroTrf) return alert('Ingresa el número de transferencia bancaria para validar el pago.');
@@ -926,12 +1149,23 @@
         requiereFactura,
         acumularFacturaMes,
         facturaMensualEmitida: false,
-        pagadoCredito: metodoPago !== 'Crédito'
+        pagadoCredito: metodoPago !== 'Crédito',
+        estadoEntrega: 'pendiente'
       };
 
       try {
         await addDoc(collection(db, 'ventas'), ventaData);
-        alert(`✅ Pedido ${numeroPedido} registrado con éxito (${gs(total)} - ${metodoPago}).`);
+
+        // Descontar stock automáticamente en productos con control de inventario
+        for (const item of cart) {
+          if (item.controlarStock) {
+            await updateDoc(doc(db, 'productos', item.id), {
+              stock: increment(-item.qty)
+            });
+          }
+        }
+
+        alert(`✅ Pedido ${numeroPedido} confirmado (${gs(total)}) y enviado a Despacho.`);
         cart = [];
         document.getElementById('cash-received').value = '';
         document.getElementById('coop-new-account').value = '';
@@ -1144,7 +1378,6 @@
       XLSX.writeFile(wb, `DeliciApp_Creditos_${mes}.xlsx`);
     });
 
-    // Notificación automática el último día del mes para facturas únicas acumuladas
     async function checkEndOfMonthInvoicesNotification() {
       if (!isLastDayOfMonth()) return;
       const mes = currentMonthStr();
@@ -1179,7 +1412,6 @@
       document.getElementById('eom-banner').classList.add('hidden');
     });
 
-    // Cargar pestaña de Facturación Mensual Acumulada
     async function loadFacturacionMensual() {
       const mes = document.getElementById('fact-month').value || currentMonthStr();
       const q = query(collection(db, 'ventas'), where('mesAnio', '==', mes), where('acumularFacturaMes', '==', true));
@@ -1284,6 +1516,174 @@
       XLSX.writeFile(wb, `DeliciApp_Facturas_Mensuales_${mes}.xlsx`);
     });
 
+    // CRUD y Edición de Productos + Stock
+    function resetProductForm() {
+      document.getElementById('prod-form').reset();
+      document.getElementById('prod-edit-id').value = '';
+      document.getElementById('prod-form-title').textContent = '🍱 Agregar / Editar Producto (Almuerzos, Bebidas, Helados, Snacks)';
+      document.getElementById('btn-submit-prod').textContent = '+ Guardar Producto';
+      document.getElementById('btn-cancel-edit-prod').classList.add('hidden');
+    }
+
+    document.getElementById('btn-cancel-edit-prod').addEventListener('click', resetProductForm);
+
+    document.getElementById('prod-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById('prod-edit-id').value;
+      const payload = {
+        nombre: document.getElementById('prod-nombre').value.trim(),
+        categoria: document.getElementById('prod-cat').value,
+        costo: Number(document.getElementById('prod-costo').value || 0),
+        precio: Number(document.getElementById('prod-precio').value || 0),
+        controlarStock: document.getElementById('prod-control-stock').checked,
+        stock: Number(document.getElementById('prod-stock-inicial').value || 0)
+      };
+
+      if (editId) {
+        await updateDoc(doc(db, 'productos', editId), payload);
+        alert('✅ Producto y precios actualizados correctamente.');
+      } else {
+        await addDoc(collection(db, 'productos'), payload);
+        alert('✅ Producto agregado al catálogo.');
+      }
+      resetProductForm();
+    });
+
+    function renderAdminProducts() {
+      const tbody = document.getElementById('admin-products-table');
+      tbody.innerHTML = '';
+      products.forEach(p => {
+        const gan = (p.precio || 0) - (p.costo || 0);
+        const stockText = p.controlarStock
+          ? `<span class="font-extrabold px-2 py-0.5 rounded-full text-xs ${Number(p.stock || 0) <= 3 ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}">${p.stock || 0} unid.</span>`
+          : '<span class="text-xs text-gray-400">Sin control</span>';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2 font-bold">${p.nombre}</td>
+          <td class="p-2">${p.categoria}</td>
+          <td class="p-2 text-canela">${gs(p.costo)}</td>
+          <td class="p-2 font-bold text-terracota">${gs(p.precio)}</td>
+          <td class="p-2 font-bold text-green-700">${gs(gan)}</td>
+          <td class="p-2">${stockText}</td>
+          <td class="p-2 space-x-2">
+            <button class="btn-edit-prod text-blue-700 text-xs font-bold hover:underline">✏️ Editar</button>
+            <button class="btn-del-prod text-red-600 text-xs font-bold hover:underline">Eliminar</button>
+          </td>
+        `;
+        tr.querySelector('.btn-edit-prod').onclick = () => {
+          document.getElementById('prod-edit-id').value = p.id;
+          document.getElementById('prod-nombre').value = p.nombre;
+          document.getElementById('prod-cat').value = p.categoria;
+          document.getElementById('prod-costo').value = p.costo || 0;
+          document.getElementById('prod-precio').value = p.precio || 0;
+          document.getElementById('prod-control-stock').checked = Boolean(p.controlarStock);
+          document.getElementById('prod-stock-inicial').value = p.stock || 0;
+          document.getElementById('prod-form-title').textContent = `✏️ Editando: ${p.nombre}`;
+          document.getElementById('btn-submit-prod').textContent = '💾 Actualizar Producto';
+          document.getElementById('btn-cancel-edit-prod').classList.remove('hidden');
+          document.getElementById('prod-form').scrollIntoView({ behavior: 'smooth' });
+        };
+        tr.querySelector('.btn-del-prod').onclick = async () => {
+          if (confirm(`¿Eliminar ${p.nombre}?`)) await deleteDoc(doc(db, 'productos', p.id));
+        };
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateStockDropdowns() {
+      const selIn = document.getElementById('stock-in-prod');
+      const selOut = document.getElementById('stock-out-prod');
+      const prevIn = selIn.value;
+      const prevOut = selOut.value;
+
+      selIn.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
+      selOut.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
+
+      products.forEach(p => {
+        const label = `${p.nombre} (${p.categoria}) — Stock: ${p.controlarStock ? (p.stock || 0) + ' unid.' : 'Sin control'}`;
+        const opt1 = document.createElement('option');
+        opt1.value = p.id;
+        opt1.textContent = label;
+        selIn.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = p.id;
+        opt2.textContent = label;
+        selOut.appendChild(opt2);
+      });
+
+      if (prevIn) selIn.value = prevIn;
+      if (prevOut) selOut.value = prevOut;
+    }
+
+    // Ingreso de Compra con Factura al Stock
+    document.getElementById('stock-in-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prodId = document.getElementById('stock-in-prod').value;
+      const factura = document.getElementById('stock-in-factura').value.trim();
+      const qty = Number(document.getElementById('stock-in-qty').value || 0);
+      const nuevoCosto = document.getElementById('stock-in-costo').value;
+      const prod = products.find(p => p.id === prodId);
+
+      if (!prod || qty <= 0) return alert('Selecciona un producto y una cantidad válida.');
+
+      const updateData = {
+        controlarStock: true,
+        stock: increment(qty)
+      };
+      if (nuevoCosto !== '' && Number(nuevoCosto) >= 0) {
+        updateData.costo = Number(nuevoCosto);
+      }
+
+      await updateDoc(doc(db, 'productos', prodId), updateData);
+      await addDoc(collection(db, 'movimientos_stock'), {
+        tipo: 'ingreso_compra',
+        fecha: todayStr(),
+        timestamp: serverTimestamp(),
+        productoId: prodId,
+        productoNombre: prod.nombre,
+        cantidad: qty,
+        facturaCompra: factura,
+        costoUnitario: nuevoCosto !== '' ? Number(nuevoCosto) : (prod.costo || 0),
+        usuario: currentUser.email
+      });
+
+      e.target.reset();
+      alert(`✅ Ingresadas ${qty} unidades de "${prod.nombre}" (Factura ${factura}).`);
+    });
+
+    // Baja / Descuento de Stock por Consumo Interno o Pérdida
+    document.getElementById('stock-out-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prodId = document.getElementById('stock-out-prod').value;
+      const motivo = document.getElementById('stock-out-motivo').value;
+      const qty = Number(document.getElementById('stock-out-qty').value || 0);
+      const obs = document.getElementById('stock-out-obs').value.trim();
+      const prod = products.find(p => p.id === prodId);
+
+      if (!prod || qty <= 0) return alert('Selecciona un producto y una cantidad válida.');
+
+      await updateDoc(doc(db, 'productos', prodId), {
+        controlarStock: true,
+        stock: increment(-qty)
+      });
+      await addDoc(collection(db, 'movimientos_stock'), {
+        tipo: 'baja_ajuste',
+        motivo,
+        fecha: todayStr(),
+        timestamp: serverTimestamp(),
+        productoId: prodId,
+        productoNombre: prod.nombre,
+        cantidad: -qty,
+        observaciones: obs,
+        usuario: currentUser.email
+      });
+
+      e.target.reset();
+      alert(`✅ Descontadas ${qty} unidades de "${prod.nombre}" por ${motivo}.`);
+    });
+
     function updateRecetaCalc() {
       const totalTanda = tempInsumos.reduce((s, i) => s + Number(i.costo || 0), 0);
       const rinde = Number(document.getElementById('rec-rinde').value || 0);
@@ -1338,7 +1738,7 @@
         nombre, rinde, totalTanda, costoUnit, insumos: tempInsumos, fecha: todayStr()
       });
       await addDoc(collection(db, 'productos'), {
-        nombre, categoria: 'Dulces', costo: costoUnit, precio: precioVenta
+        nombre, categoria: 'Dulces', costo: costoUnit, precio: precioVenta, controlarStock: false, stock: 0
       });
 
       tempInsumos = [];
@@ -1348,38 +1748,6 @@
       renderTempInsumos();
       alert(`✅ Producto "${nombre}" creado con costo unitario de ${gs(costoUnit)}.`);
     };
-
-    document.getElementById('prod-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await addDoc(collection(db, 'productos'), {
-        nombre: document.getElementById('prod-nombre').value.trim(),
-        categoria: document.getElementById('prod-cat').value,
-        costo: Number(document.getElementById('prod-costo').value || 0),
-        precio: Number(document.getElementById('prod-precio').value || 0)
-      });
-      e.target.reset();
-    });
-
-    function renderAdminProducts() {
-      const tbody = document.getElementById('admin-products-table');
-      tbody.innerHTML = '';
-      products.forEach(p => {
-        const gan = (p.precio || 0) - (p.costo || 0);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-2 font-bold">${p.nombre}</td>
-          <td class="p-2">${p.categoria}</td>
-          <td class="p-2 text-canela">${gs(p.costo)}</td>
-          <td class="p-2 font-bold text-terracota">${gs(p.precio)}</td>
-          <td class="p-2 font-bold text-green-700">${gs(gan)}</td>
-          <td class="p-2"><button class="text-red-600 text-xs font-bold hover:underline">Eliminar</button></td>
-        `;
-        tr.querySelector('button').onclick = async () => {
-          if (confirm(`¿Eliminar ${p.nombre}?`)) await deleteDoc(doc(db, 'productos', p.id));
-        };
-        tbody.appendChild(tr);
-      });
-    }
 
     async function loadReportes() {
       const fecha = document.getElementById('rep-date').value || todayStr();
@@ -1445,6 +1813,7 @@
         'Delivery': v.conDelivery ? `Sí (${gs(v.deliveryMonto || 10000)})` : 'No',
         'Método de Pago': v.metodoPago,
         'N° Cuenta / Comprobante': v.referenciaPago || '',
+        'Estado Entrega': v.estadoEntrega === 'entregado' ? 'Entregado' : 'Pendiente',
         'Detalle Artículos': (v.items || []).map(i => `${i.qty}x ${i.nombre}`).join(', '),
         'Costo Total (Gs.)': v.costoTotal || 0,
         'Venta Total (Gs.)': v.total,
