@@ -43,7 +43,7 @@
       <div class="flex flex-col items-center mb-6">
         <img src="./logo.jpg" alt="Delicias Artesanales" class="w-36 h-36 object-contain rounded-full shadow-md border-4 border-amber-100 mb-3" />
         <h1 class="text-2xl font-extrabold text-chocolate">DeliciApp</h1>
-        <p class="text-sm text-canela">Sistema de Cantina, Despacho & Stock</p>
+        <p class="text-sm text-canela">Sistema de Cantina, Despacho & Administración</p>
       </div>
 
       <form id="login-form" class="space-y-4">
@@ -60,7 +60,7 @@
 
         <div>
           <label class="block text-xs font-bold uppercase text-canela mb-1">Usuario (Correo)</label>
-          <input type="email" id="login-email" required placeholder="caja1@deliciapp.com o despacho1@deliciapp.com"
+          <input type="email" id="login-email" required placeholder="admin@deliciapp.com o caja1@deliciapp.com"
             class="w-full border-2 border-amber-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-terracota" />
         </div>
 
@@ -138,7 +138,7 @@
         🧾 Clientes y RUC
       </button>
       <button data-tab="arqueo" class="cashier-admin-only tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
-        💰 Arqueo de Caja
+        💰 Arqueo y Depósitos
       </button>
       <button data-tab="creditos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         📒 Créditos del Mes
@@ -146,8 +146,14 @@
       <button data-tab="facturacion" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         📑 Facturación Mensual
       </button>
+      <button data-tab="proveedores" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+        🏭 Proveedores
+      </button>
       <button data-tab="productos" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
-        🍩 Productos, Stock y Recetas
+        🍩 Productos y Stock
+      </button>
+      <button data-tab="iva" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
+        🧮 IVA y Cuota DBN
       </button>
       <button data-tab="reportes" class="admin-only hidden tab-btn px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap bg-white text-chocolate border border-amber-200">
         📊 Ranking y Ventas
@@ -338,9 +344,9 @@
         </div>
       </section>
 
-      <!-- 3. ARQUEO DE CAJA -->
-      <section id="tab-arqueo" class="tab-content hidden space-y-4">
-        <div class="bg-white p-5 rounded-2xl border border-amber-200 shadow-sm max-w-2xl mx-auto space-y-4">
+      <!-- 3. ARQUEO DE CAJA Y DEPÓSITOS DE EFECTIVO -->
+      <section id="tab-arqueo" class="tab-content hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border border-amber-200 shadow-sm max-w-3xl mx-auto space-y-4">
           <div class="flex justify-between items-center border-b border-amber-100 pb-3">
             <div>
               <h2 class="font-extrabold text-lg">Arqueo y Cierre de Jornada</h2>
@@ -351,7 +357,7 @@
 
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
             <div class="bg-crema p-3 rounded-xl border border-amber-100">
-              <span class="text-xs text-canela block">Efectivo (Sistema)</span>
+              <span class="text-xs text-canela block">Efectivo Recaudado Hoy</span>
               <span id="arq-sys-efectivo" class="font-extrabold text-lg">0 Gs.</span>
             </div>
             <div class="bg-crema p-3 rounded-xl border border-amber-100">
@@ -387,6 +393,48 @@
             <button id="btn-save-arqueo" class="w-full bg-chocolate hover:bg-black text-white font-bold py-3 rounded-xl">
               🔒 Registrar Cierre de Caja
             </button>
+          </div>
+        </div>
+
+        <!-- MÓDULO DE DEPÓSITO DE EFECTIVO DE RECAUDACIÓN (SOLO ADMIN) -->
+        <div class="admin-only hidden bg-white p-5 rounded-2xl border-2 border-emerald-200 shadow-sm max-w-3xl mx-auto space-y-4">
+          <div class="flex flex-wrap justify-between items-center gap-2 border-b border-emerald-100 pb-3">
+            <div>
+              <h2 class="font-extrabold text-lg text-emerald-950">🏦 Depósito de Efectivo de la Recaudación</h2>
+              <p class="text-xs text-emerald-800">Registra los depósitos realizados en banco o cooperativa del efectivo recaudado de todas las cajas.</p>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl text-right">
+              <span class="text-[11px] text-emerald-800 block font-bold">Efectivo Disponible (Mes Actual)</span>
+              <span id="dep-saldo-disponible" class="font-black text-base text-emerald-900">0 Gs.</span>
+            </div>
+          </div>
+
+          <form id="deposito-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <input type="date" id="dep-fecha" required class="border border-emerald-300 rounded-xl px-3 py-2 text-sm bg-crema" />
+            <input type="number" id="dep-monto" required min="1" placeholder="Monto depositado (Gs.)" class="border border-emerald-300 rounded-xl px-3 py-2 text-sm font-bold" />
+            <input type="text" id="dep-destino" required placeholder="Banco / Cooperativa destino" class="border border-emerald-300 rounded-xl px-3 py-2 text-sm" />
+            <input type="text" id="dep-comprobante" required placeholder="N° Boleta / Comprobante" class="border border-emerald-300 rounded-xl px-3 py-2 text-sm font-mono" />
+            <div class="sm:col-span-2 md:col-span-4 flex gap-2">
+              <input type="text" id="dep-obs" placeholder="Observaciones del depósito (opcional)" class="flex-1 border border-emerald-200 rounded-xl px-3 py-2 text-xs" />
+              <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-5 py-2 rounded-xl text-xs shadow">
+                💾 Registrar Depósito
+              </button>
+            </div>
+          </form>
+
+          <div class="overflow-x-auto pt-2">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-emerald-50 text-emerald-950">
+                <tr>
+                  <th class="p-2">Fecha</th>
+                  <th class="p-2">Destino (Banco / Coop.)</th>
+                  <th class="p-2">N° Boleta</th>
+                  <th class="p-2">Monto Depositado</th>
+                  <th class="p-2">Registrado por</th>
+                </tr>
+              </thead>
+              <tbody id="depositos-table" class="divide-y divide-emerald-100"></tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -426,6 +474,42 @@
             </div>
           </div>
           <div id="facturacion-list" class="space-y-4"></div>
+        </div>
+      </section>
+
+      <!-- 4C. PROVEEDORES (ESTADO DE CUENTA Y ANTICIPOS DE PAGO - SOLO ADMIN) -->
+      <section id="tab-proveedores" class="tab-content hidden space-y-5">
+        <div class="bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-sm space-y-4">
+          <div class="flex flex-wrap justify-between items-center gap-2">
+            <div>
+              <h2 class="font-extrabold text-lg text-chocolate">🏭 Estado de Cuenta con Proveedores</h2>
+              <p class="text-xs text-canela">Control de facturas a crédito, fechas de vencimiento y registro de anticipos de pago.</p>
+            </div>
+            <button id="btn-export-proveedores" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow">
+              📥 Descargar Excel Proveedores
+            </button>
+          </div>
+
+          <!-- Formulario para registrar anticipo / pago a una factura a crédito -->
+          <div class="bg-manteca p-4 rounded-2xl border border-amber-300 space-y-3">
+            <h3 class="font-extrabold text-sm text-chocolate">💸 Registrar Anticipo / Pago a Factura de Proveedor</h3>
+            <form id="anticipo-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+              <select id="ant-factura-select" required class="border border-amber-300 rounded-xl px-3 py-2 text-xs bg-white font-bold md:col-span-2">
+                <option value="">-- Seleccionar Factura Pendiente de Pago --</option>
+              </select>
+              <input type="date" id="ant-fecha" required class="border border-amber-300 rounded-xl px-3 py-2 text-xs bg-white" />
+              <input type="number" id="ant-monto" required min="1" placeholder="Monto anticipo (Gs.)" class="border border-amber-300 rounded-xl px-3 py-2 text-xs bg-white font-bold" />
+              <div class="flex gap-2">
+                <input type="text" id="ant-obs" placeholder="Ref. / Método pago" class="flex-1 min-w-0 border border-amber-300 rounded-xl px-2.5 py-2 text-xs bg-white" />
+                <button type="submit" class="bg-terracota hover:bg-cobre text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow whitespace-nowrap">
+                  + Abonar
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Listado agrupado por proveedor -->
+          <div id="proveedores-list" class="space-y-4"></div>
         </div>
       </section>
 
@@ -500,24 +584,45 @@
           </div>
         </div>
 
-        <!-- GESTIÓN DE INVENTARIO: INGRESO POR FACTURA DE COMPRA Y BAJAS POR CONSUMO / PÉRDIDA -->
+        <!-- GESTIÓN DE INVENTARIO: INGRESO POR FACTURA DE COMPRA CON PROVEEDOR Y BAJAS -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <!-- Ingreso de Compra con Factura -->
+          <!-- Ingreso de Compra con Factura y Proveedor -->
           <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-200 shadow-sm space-y-3">
-            <h3 class="font-extrabold text-base text-emerald-950">📥 Ingresar Compra al Stock (Con Factura)</h3>
-            <p class="text-xs text-emerald-800">Suma unidades recibidas de proveedores (bebidas, helados, snacks) y actualiza su costo si varió.</p>
+            <h3 class="font-extrabold text-base text-emerald-950">📥 Compra de Mercaderías (Ingreso a Stock y Proveedores)</h3>
+            <p class="text-xs text-emerald-800">Suma unidades al stock, registra al proveedor y alimenta el estado de cuenta (si es a crédito) y el IVA Crédito Fiscal.</p>
             <form id="stock-in-form" class="space-y-2.5">
-              <select id="stock-in-prod" required class="w-full border border-emerald-300 rounded-xl px-3 py-2 text-sm bg-white font-semibold">
-                <option value="">-- Seleccionar Producto --</option>
-              </select>
-              <div class="grid grid-cols-2 gap-2">
-                <input type="text" id="stock-in-factura" required placeholder="N° Factura Compra (Ej: 001-001-004521)" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white" />
-                <input type="number" id="stock-in-qty" required min="1" placeholder="Cantidad que entra (unid.)" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white font-bold" />
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="stock-in-prov-nombre" required placeholder="Nombre / Razón Social Proveedor" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white font-semibold" />
+                <input type="text" id="stock-in-prov-ruc" required placeholder="RUC Proveedor (Ej: 80012345-6)" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white" />
               </div>
-              <div class="flex gap-2">
-                <input type="number" id="stock-in-costo" placeholder="Nuevo costo unitario (opcional Gs.)" class="flex-1 border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white" />
+
+              <select id="stock-in-prod" required class="w-full border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white font-semibold">
+                <option value="">-- Seleccionar Producto que Ingresa --</option>
+              </select>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <input type="text" id="stock-in-factura" required placeholder="N° Factura (001-001-000123)" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white" />
+                <select id="stock-in-condicion" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white font-bold">
+                  <option value="Contado">💵 Contado</option>
+                  <option value="Crédito">📒 Crédito</option>
+                </select>
+                <div id="stock-in-venc-wrap" class="hidden col-span-2 sm:col-span-1">
+                  <input type="date" id="stock-in-vencimiento" title="Fecha de vencimiento de factura" class="w-full border border-red-300 rounded-xl px-2.5 py-2 text-xs bg-white font-semibold text-red-900" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="stock-in-qty" required min="1" placeholder="Cantidad unidades" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white font-bold" />
+                <input type="number" id="stock-in-costo" required min="0" placeholder="Costo unitario compra (Gs.)" class="border border-emerald-300 rounded-xl px-3 py-2 text-xs bg-white font-bold" />
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <label class="flex items-center gap-1.5 text-xs font-bold text-emerald-950 cursor-pointer">
+                  <input type="checkbox" id="stock-in-iva" checked class="w-4 h-4 accent-emerald-700" />
+                  Factura legal con IVA 10% incluido
+                </label>
                 <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl text-xs shadow">
-                  + Sumar al Stock
+                  + Registrar Compra y Stock
                 </button>
               </div>
             </form>
@@ -579,6 +684,86 @@
             <button type="button" id="btn-save-receta-producto" class="bg-chocolate hover:bg-black text-white font-bold px-4 py-2.5 rounded-xl text-sm">
               💾 Guardar Producto con este Costo
             </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5B. CÁLCULO DE IVA MENSUAL Y CUOTA DBN 10% (SOLO ADMIN) -->
+      <section id="tab-iva" class="tab-content hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border-2 border-amber-200 shadow-sm space-y-5">
+          <div class="flex flex-wrap justify-between items-center gap-3 border-b border-amber-100 pb-3">
+            <div>
+              <h2 class="font-extrabold text-lg text-chocolate">🧮 Liquidación Mensual de IVA (10%) y Cuota DBN</h2>
+              <p class="text-xs text-canela">Cálculo automático basado en las ventas totales y facturas de compra gravadas registradas en el mes.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="month" id="iva-month" class="border-2 border-amber-200 rounded-xl px-3 py-2 text-sm font-bold" />
+              <button id="btn-export-iva-dbn" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow">
+                📥 Descargar Excel IVA y DBN
+              </button>
+            </div>
+          </div>
+
+          <!-- BLOQUE 1: CÁLCULO DE IVA A PAGAR POR MES (Paraguay IVA 10% = Total / 11) -->
+          <div class="space-y-3">
+            <h3 class="font-extrabold text-base text-chocolate">1. Cálculo de IVA Mensual (Tasa 10% Incluido)</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="bg-crema p-4 rounded-2xl border border-amber-200">
+                <span class="text-xs text-canela font-bold block">Ventas Totales del Mes (IVA Inc.)</span>
+                <span id="iva-ventas-brutas" class="text-xl font-black text-chocolate mt-1 block">0 Gs.</span>
+                <span class="text-[11px] text-canela">Débito Fiscal (Ventas ÷ 11): <strong id="iva-debito" class="text-terracota">0 Gs.</strong></span>
+              </div>
+
+              <div class="bg-crema p-4 rounded-2xl border border-amber-200">
+                <span class="text-xs text-canela font-bold block">Compras con Factura IVA 10%</span>
+                <span id="iva-compras-brutas" class="text-xl font-black text-chocolate mt-1 block">0 Gs.</span>
+                <span class="text-[11px] text-canela">Crédito Fiscal (Compras ÷ 11): <strong id="iva-credito" class="text-emerald-700">0 Gs.</strong></span>
+              </div>
+
+              <div class="bg-amber-50 p-4 rounded-2xl border-2 border-terracota sm:col-span-2 flex flex-col justify-center">
+                <span class="text-xs text-cobre font-extrabold uppercase block">Saldo Neto de IVA a Pagar en el Mes</span>
+                <span id="iva-a-pagar" class="text-3xl font-black text-terracota mt-1 block">0 Gs.</span>
+                <span id="iva-status-note" class="text-xs text-canela mt-1">Débito Fiscal menos Crédito Fiscal por compras del mes.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOQUE 2: CUOTA DBN (10% DE TODAS LAS VENTAS TOTALES DEL MES) -->
+          <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5 space-y-3">
+            <div class="flex flex-wrap justify-between items-center gap-2">
+              <div>
+                <span class="text-xs font-extrabold uppercase tracking-wider text-blue-800 bg-blue-100 px-2.5 py-1 rounded-full">Aporte / Canon Mensual</span>
+                <h3 class="font-extrabold text-lg text-blue-950 mt-2">2. Cuota DBN — 10% sobre Ventas Totales del Mes</h3>
+                <p class="text-xs text-blue-800">Corresponde exactamente al 10% directo sobre el monto bruto de todas las ventas realizadas en el mes.</p>
+              </div>
+              <div class="bg-white border-2 border-blue-300 px-5 py-3 rounded-2xl text-right shadow-sm">
+                <span class="text-xs text-blue-700 font-bold block">Cuota DBN a Abonar (10%)</span>
+                <span id="dbn-cuota-monto" class="text-3xl font-black text-blue-900">0 Gs.</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-blue-200 text-xs">
+              <div class="bg-white/80 p-2.5 rounded-xl">
+                <span class="text-blue-700 block">Efectivo</span>
+                <strong id="dbn-det-efectivo" class="text-blue-950">0 Gs.</strong>
+              </div>
+              <div class="bg-white/80 p-2.5 rounded-xl">
+                <span class="text-blue-700 block">QR Débito/Crédito</span>
+                <strong id="dbn-det-qr" class="text-blue-950">0 Gs.</strong>
+              </div>
+              <div class="bg-white/80 p-2.5 rounded-xl">
+                <span class="text-blue-700 block">Transf. Cooperativa</span>
+                <strong id="dbn-det-coop" class="text-blue-950">0 Gs.</strong>
+              </div>
+              <div class="bg-white/80 p-2.5 rounded-xl">
+                <span class="text-blue-700 block">Transf. Bancaria</span>
+                <strong id="dbn-det-banco" class="text-blue-950">0 Gs.</strong>
+              </div>
+              <div class="bg-white/80 p-2.5 rounded-xl">
+                <span class="text-blue-700 block">Ventas a Crédito</span>
+                <strong id="dbn-det-credito" class="text-blue-950">0 Gs.</strong>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -648,13 +833,16 @@
     let clients = [];
     let cart = [];
     let tempInsumos = [];
+    let comprasProveedores = [];
+    let depositosList = [];
     let lastReportSales = [];
     let lastRankingSorted = [];
     let lastCreditSales = [];
     let lastMonthlyInvoices = [];
+    let lastIvaSummary = {};
 
     const ADMIN_EMAIL = 'admin@deliciapp.com';
-    const gs = (n) => Number(n || 0).toLocaleString('es-PY') + ' Gs.';
+    const gs = (n) => Math.round(Number(n || 0)).toLocaleString('es-PY') + ' Gs.';
     const todayStr = () => new Date().toISOString().slice(0, 10);
     const currentMonthStr = () => new Date().toISOString().slice(0, 7);
 
@@ -755,15 +943,19 @@
         document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
         document.getElementById(`tab-${target}`).classList.remove('hidden');
 
-        if (target === 'arqueo') loadArqueo();
+        if (target === 'arqueo') {
+          loadArqueo();
+          if (isAdmin) loadDepositos();
+        }
         if (target === 'creditos' && isAdmin) loadCreditos();
         if (target === 'facturacion' && isAdmin) loadFacturacionMensual();
+        if (target === 'proveedores' && isAdmin) renderProveedores();
+        if (target === 'iva' && isAdmin) loadIvaAndDbn();
         if (target === 'reportes' && isAdmin) loadReportes();
       });
     });
 
     function initRealtimeData() {
-      // Escuchar tarifa de delivery editable
       onSnapshot(doc(db, 'config', 'general'), (snap) => {
         if (snap.exists() && snap.data().deliveryPrice !== undefined) {
           deliveryPrice = Number(snap.data().deliveryPrice);
@@ -776,7 +968,6 @@
         renderCart();
       });
 
-      // Escuchar productos y stock en vivo
       onSnapshot(collection(db, 'productos'), (snap) => {
         products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderPOS();
@@ -786,14 +977,19 @@
         }
       });
 
-      // Escuchar clientes en vivo
       onSnapshot(collection(db, 'clientes'), (snap) => {
         clients = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderClients();
         updateCoopAccountsDropdown();
       });
 
-      // Escuchar pedidos del día en vivo para la cola de Despacho
+      if (isAdmin) {
+        onSnapshot(collection(db, 'compras_proveedores'), (snap) => {
+          comprasProveedores = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderProveedores();
+        });
+      }
+
       const qHoy = query(collection(db, 'ventas'), where('fecha', '==', todayStr()));
       onSnapshot(qHoy, (snap) => {
         const ventasHoy = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -802,10 +998,20 @@
 
       document.getElementById('cred-month').value = currentMonthStr();
       document.getElementById('fact-month').value = currentMonthStr();
+      document.getElementById('iva-month').value = currentMonthStr();
       document.getElementById('rep-date').value = todayStr();
+      document.getElementById('dep-fecha').value = todayStr();
+      document.getElementById('ant-fecha').value = todayStr();
     }
 
-    // Renderizar cola de Despacho (Pendientes y Entregados hoy)
+    // Mostrar/ocultar fecha de vencimiento si la compra es a Crédito
+    document.getElementById('stock-in-condicion').addEventListener('change', (e) => {
+      const isCred = e.target.value === 'Crédito';
+      document.getElementById('stock-in-venc-wrap').classList.toggle('hidden', !isCred);
+      document.getElementById('stock-in-vencimiento').required = isCred;
+    });
+
+    // Renderizar cola de Despacho
     function renderDespacho(ventasHoy) {
       const pendientes = ventasHoy
         .filter(v => (v.estadoEntrega || 'pendiente') === 'pendiente')
@@ -877,7 +1083,6 @@
       }
     }
 
-    // Guardar tarifa de delivery (Admin)
     document.getElementById('btn-save-delivery-cfg').addEventListener('click', async () => {
       const val = Number(document.getElementById('cfg-delivery-price').value || 0);
       if (val < 0) return alert('Ingresa un monto válido.');
@@ -1156,7 +1361,6 @@
       try {
         await addDoc(collection(db, 'ventas'), ventaData);
 
-        // Descontar stock automáticamente en productos con control de inventario
         for (const item of cart) {
           if (item.controlarStock) {
             await updateDoc(doc(db, 'productos', item.id), {
@@ -1233,6 +1437,7 @@
     }
     document.getElementById('cli-search').addEventListener('input', renderClients);
 
+    // 3. ARQUEO Y DEPÓSITOS DE EFECTIVO
     let currentArqueoTotals = { efectivo: 0, qr: 0, coop: 0, banco: 0, credito: 0 };
 
     async function loadArqueo() {
@@ -1267,7 +1472,10 @@
       el.className = diff === 0 ? 'text-green-700 font-black' : (diff < 0 ? 'text-red-600 font-black' : 'text-blue-700 font-black');
     }
     document.getElementById('arq-contado').addEventListener('input', calcArqueoDiff);
-    document.getElementById('btn-refresh-arqueo').onclick = loadArqueo;
+    document.getElementById('btn-refresh-arqueo').onclick = () => {
+      loadArqueo();
+      if (isAdmin) loadDepositos();
+    };
 
     document.getElementById('btn-save-arqueo').addEventListener('click', async () => {
       const contado = Number(document.getElementById('arq-contado').value || 0);
@@ -1284,6 +1492,72 @@
       alert('✅ Arqueo de caja registrado correctamente.');
     });
 
+    async function loadDepositos() {
+      const mes = currentMonthStr();
+      const qVentasMes = query(collection(db, 'ventas'), where('mesAnio', '==', mes), where('metodoPago', '==', 'Efectivo'));
+      const snapVentas = await getDocs(qVentasMes);
+      let totalEfectivoMes = 0;
+      snapVentas.forEach(d => totalEfectivoMes += Number(d.data().total || 0));
+
+      const qDep = query(collection(db, 'depositos'), where('mesAnio', '==', mes));
+      const snapDep = await getDocs(qDep);
+      let totalDepositadoMes = 0;
+      depositosList = [];
+      snapDep.forEach(d => {
+        const dep = { id: d.id, ...d.data() };
+        depositosList.push(dep);
+        totalDepositadoMes += Number(dep.monto || 0);
+      });
+
+      const disponible = totalEfectivoMes - totalDepositadoMes;
+      document.getElementById('dep-saldo-disponible').textContent = gs(disponible);
+
+      const tbody = document.getElementById('depositos-table');
+      if (depositosList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-gray-500">No hay depósitos registrados en este mes.</td></tr>';
+        return;
+      }
+
+      depositosList.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+      tbody.innerHTML = depositosList.map(d => `
+        <tr>
+          <td class="p-2 font-mono">${d.fecha}</td>
+          <td class="p-2 font-bold">${d.destino}</td>
+          <td class="p-2 font-mono">${d.comprobante}</td>
+          <td class="p-2 font-black text-emerald-700">${gs(d.monto)}</td>
+          <td class="p-2 text-gray-600">${d.usuario || ''}</td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('deposito-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fecha = document.getElementById('dep-fecha').value || todayStr();
+      const monto = Number(document.getElementById('dep-monto').value || 0);
+      const destino = document.getElementById('dep-destino').value.trim();
+      const comprobante = document.getElementById('dep-comprobante').value.trim();
+      const obs = document.getElementById('dep-obs').value.trim();
+
+      if (monto <= 0) return alert('Ingresa un monto válido.');
+
+      await addDoc(collection(db, 'depositos'), {
+        fecha,
+        mesAnio: fecha.slice(0, 7),
+        timestamp: serverTimestamp(),
+        monto,
+        destino,
+        comprobante,
+        observaciones: obs,
+        usuario: currentUser.email
+      });
+
+      e.target.reset();
+      document.getElementById('dep-fecha').value = todayStr();
+      alert(`✅ Depósito de ${gs(monto)} registrado correctamente.`);
+      loadDepositos();
+    });
+
+    // 4. CRÉDITOS DEL MES
     async function loadCreditos() {
       const mes = document.getElementById('cred-month').value || currentMonthStr();
       const q = query(collection(db, 'ventas'), where('mesAnio', '==', mes), where('metodoPago', '==', 'Crédito'));
@@ -1378,6 +1652,7 @@
       XLSX.writeFile(wb, `DeliciApp_Creditos_${mes}.xlsx`);
     });
 
+    // 4B. FACTURACIÓN MENSUAL ACUMULADA
     async function checkEndOfMonthInvoicesNotification() {
       if (!isLastDayOfMonth()) return;
       const mes = currentMonthStr();
@@ -1516,7 +1791,165 @@
       XLSX.writeFile(wb, `DeliciApp_Facturas_Mensuales_${mes}.xlsx`);
     });
 
-    // CRUD y Edición de Productos + Stock
+    // 4C. PROVEEDORES (ESTADO DE CUENTA A CRÉDITO Y ANTICIPOS)
+    function renderProveedores() {
+      const container = document.getElementById('proveedores-list');
+      const selAnt = document.getElementById('ant-factura-select');
+      if (!container || !selAnt) return;
+
+      container.innerHTML = '';
+      selAnt.innerHTML = '<option value="">-- Seleccionar Factura a Crédito Pendiente de Pago --</option>';
+
+      const creditPurchases = comprasProveedores.filter(c => c.condicion === 'Crédito');
+      if (creditPurchases.length === 0) {
+        container.innerHTML = '<p class="text-sm text-canela py-4">No hay facturas de compra a crédito registradas aún.</p>';
+        return;
+      }
+
+      const grouped = {};
+      creditPurchases.forEach(c => {
+        const anticipos = Array.isArray(c.anticipos) ? c.anticipos : [];
+        const totalAbonado = anticipos.reduce((s, a) => s + Number(a.monto || 0), 0);
+        const saldo = Math.max(0, Number(c.montoTotal || 0) - totalAbonado);
+
+        if (saldo > 0) {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `${c.proveedorNombre} (RUC: ${c.proveedorRuc}) — Fact. ${c.facturaCompra} — Saldo: ${gs(saldo)}`;
+          selAnt.appendChild(opt);
+        }
+
+        const key = (c.proveedorRuc || c.proveedorNombre).trim();
+        if (!grouped[key]) {
+          grouped[key] = {
+            nombre: c.proveedorNombre,
+            ruc: c.proveedorRuc,
+            facturas: [],
+            saldoTotal: 0
+          };
+        }
+        grouped[key].facturas.push({ ...c, anticipos, totalAbonado, saldo });
+        grouped[key].saldoTotal += saldo;
+      });
+
+      Object.values(grouped).forEach(prov => {
+        const card = document.createElement('div');
+        card.className = 'border-2 border-amber-200 rounded-2xl p-4 bg-crema space-y-3';
+
+        const rowsHtml = prov.facturas.map(f => {
+          const vencido = f.saldo > 0 && f.fechaVencimiento && f.fechaVencimiento < todayStr();
+          const antHtml = f.anticipos.length > 0
+            ? f.anticipos.map(a => `<div class="text-[11px] text-emerald-800">• ${a.fecha}: <strong>${gs(a.monto)}</strong> ${a.obs ? `(${a.obs})` : ''}</div>`).join('')
+            : '<span class="text-[11px] text-gray-400">Sin anticipos</span>';
+
+          return `
+            <tr class="border-t border-amber-100 text-xs align-top">
+              <td class="py-2 font-mono">${f.fecha}</td>
+              <td class="py-2 font-bold">${f.facturaCompra}</td>
+              <td class="py-2">${f.cantidad}x ${f.productoNombre}</td>
+              <td class="py-2 font-mono ${vencido ? 'text-red-600 font-black' : ''}">
+                ${f.fechaVencimiento || '-'} ${vencido ? '⚠️ VENCIDA' : ''}
+              </td>
+              <td class="py-2 font-bold">${gs(f.montoTotal)}</td>
+              <td class="py-2">${antHtml}</td>
+              <td class="py-2 font-black ${f.saldo > 0 ? 'text-terracota' : 'text-emerald-700'}">
+                ${f.saldo > 0 ? gs(f.saldo) : '✔ Saldada'}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="flex flex-wrap justify-between items-center gap-2">
+            <div>
+              <h3 class="font-extrabold text-base text-chocolate">${prov.nombre}</h3>
+              <p class="text-xs text-canela">RUC Proveedor: <strong>${prov.ruc}</strong></p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-canela block">Deuda Total Pendiente</span>
+              <span class="font-black text-lg text-terracota">${gs(prov.saldoTotal)}</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="text-[11px] uppercase text-canela">
+                  <th>Fecha Compra</th>
+                  <th>N° Factura</th>
+                  <th>Mercadería</th>
+                  <th>Vencimiento</th>
+                  <th>Total Factura</th>
+                  <th>Anticipos Realizados</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById('anticipo-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const compraId = document.getElementById('ant-factura-select').value;
+      const fecha = document.getElementById('ant-fecha').value || todayStr();
+      const monto = Number(document.getElementById('ant-monto').value || 0);
+      const obs = document.getElementById('ant-obs').value.trim();
+
+      const compraObj = comprasProveedores.find(c => c.id === compraId);
+      if (!compraObj || monto <= 0) return alert('Selecciona una factura y un monto válido.');
+
+      const anticipos = Array.isArray(compraObj.anticipos) ? compraObj.anticipos : [];
+      const totalAbonado = anticipos.reduce((s, a) => s + Number(a.monto || 0), 0);
+      const saldoActual = Number(compraObj.montoTotal || 0) - totalAbonado;
+
+      if (monto > saldoActual) {
+        return alert(`El anticipo (${gs(monto)}) no puede superar el saldo pendiente (${gs(saldoActual)}).`);
+      }
+
+      await updateDoc(doc(db, 'compras_proveedores', compraId), {
+        anticipos: arrayUnion({
+          fecha,
+          monto,
+          obs,
+          usuario: currentUser.email
+        })
+      });
+
+      e.target.reset();
+      document.getElementById('ant-fecha').value = todayStr();
+      alert(`✅ Anticipo de ${gs(monto)} registrado a la factura ${compraObj.facturaCompra}.`);
+    });
+
+    document.getElementById('btn-export-proveedores').addEventListener('click', () => {
+      if (comprasProveedores.length === 0) return alert('No hay compras a proveedores registradas para exportar.');
+      const rows = comprasProveedores.map(c => {
+        const anticipos = Array.isArray(c.anticipos) ? c.anticipos : [];
+        const totalAbonado = anticipos.reduce((s, a) => s + Number(a.monto || 0), 0);
+        const saldo = c.condicion === 'Crédito' ? Math.max(0, Number(c.montoTotal || 0) - totalAbonado) : 0;
+        return {
+          'Fecha Compra': c.fecha,
+          'Proveedor': c.proveedorNombre,
+          'RUC Proveedor': c.proveedorRuc,
+          'N° Factura': c.facturaCompra,
+          'Condición': c.condicion,
+          'Vencimiento': c.fechaVencimiento || '-',
+          'Producto': c.productoNombre,
+          'Cantidad': c.cantidad,
+          'Monto Total (Gs.)': c.montoTotal,
+          'Total Anticipos (Gs.)': totalAbonado,
+          'Saldo Pendiente (Gs.)': saldo,
+          'Con IVA 10%': c.conIva ? 'Sí' : 'No'
+        };
+      });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Estado_Proveedores');
+      XLSX.writeFile(wb, `DeliciApp_Proveedores_${todayStr()}.xlsx`);
+    });
+
+    // 5. CRUD PRODUCTOS Y STOCK
     function resetProductForm() {
       document.getElementById('prod-form').reset();
       document.getElementById('prod-edit-id').value = '';
@@ -1597,7 +2030,7 @@
       const prevIn = selIn.value;
       const prevOut = selOut.value;
 
-      selIn.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
+      selIn.innerHTML = '<option value="">-- Seleccionar Producto que Ingresa --</option>';
       selOut.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
 
       products.forEach(p => {
@@ -1617,26 +2050,49 @@
       if (prevOut) selOut.value = prevOut;
     }
 
-    // Ingreso de Compra con Factura al Stock
+    // Ingreso de Compra con Factura, Proveedor, Condición y Vencimiento
     document.getElementById('stock-in-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const provNombre = document.getElementById('stock-in-prov-nombre').value.trim();
+      const provRuc = document.getElementById('stock-in-prov-ruc').value.trim();
       const prodId = document.getElementById('stock-in-prod').value;
       const factura = document.getElementById('stock-in-factura').value.trim();
+      const condicion = document.getElementById('stock-in-condicion').value;
+      const fechaVencimiento = condicion === 'Crédito' ? document.getElementById('stock-in-vencimiento').value : '';
       const qty = Number(document.getElementById('stock-in-qty').value || 0);
-      const nuevoCosto = document.getElementById('stock-in-costo').value;
-      const prod = products.find(p => p.id === prodId);
+      const costoUnit = Number(document.getElementById('stock-in-costo').value || 0);
+      const conIva = document.getElementById('stock-in-iva').checked;
 
+      const prod = products.find(p => p.id === prodId);
       if (!prod || qty <= 0) return alert('Selecciona un producto y una cantidad válida.');
 
-      const updateData = {
-        controlarStock: true,
-        stock: increment(qty)
-      };
-      if (nuevoCosto !== '' && Number(nuevoCosto) >= 0) {
-        updateData.costo = Number(nuevoCosto);
-      }
+      const montoTotal = qty * costoUnit;
 
-      await updateDoc(doc(db, 'productos', prodId), updateData);
+      await updateDoc(doc(db, 'productos', prodId), {
+        controlarStock: true,
+        stock: increment(qty),
+        costo: costoUnit
+      });
+
+      await addDoc(collection(db, 'compras_proveedores'), {
+        fecha: todayStr(),
+        mesAnio: currentMonthStr(),
+        timestamp: serverTimestamp(),
+        proveedorNombre: provNombre,
+        proveedorRuc: provRuc,
+        productoId: prodId,
+        productoNombre: prod.nombre,
+        facturaCompra: factura,
+        condicion,
+        fechaVencimiento,
+        cantidad: qty,
+        costoUnitario: costoUnit,
+        montoTotal,
+        conIva,
+        anticipos: [],
+        usuario: currentUser.email
+      });
+
       await addDoc(collection(db, 'movimientos_stock'), {
         tipo: 'ingreso_compra',
         fecha: todayStr(),
@@ -1645,15 +2101,17 @@
         productoNombre: prod.nombre,
         cantidad: qty,
         facturaCompra: factura,
-        costoUnitario: nuevoCosto !== '' ? Number(nuevoCosto) : (prod.costo || 0),
+        proveedorNombre: provNombre,
+        costoUnitario: costoUnit,
         usuario: currentUser.email
       });
 
       e.target.reset();
-      alert(`✅ Ingresadas ${qty} unidades de "${prod.nombre}" (Factura ${factura}).`);
+      document.getElementById('stock-in-iva').checked = true;
+      document.getElementById('stock-in-venc-wrap').classList.add('hidden');
+      alert(`✅ Compra registrada: ${qty}x "${prod.nombre}" de ${provNombre} (${condicion}).`);
     });
 
-    // Baja / Descuento de Stock por Consumo Interno o Pérdida
     document.getElementById('stock-out-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const prodId = document.getElementById('stock-out-prod').value;
@@ -1749,6 +2207,103 @@
       alert(`✅ Producto "${nombre}" creado con costo unitario de ${gs(costoUnit)}.`);
     };
 
+    // 5B. CÁLCULO DE IVA MENSUAL (10%) Y CUOTA DBN (10% SOBRE VENTAS TOTALES)
+    async function loadIvaAndDbn() {
+      const mes = document.getElementById('iva-month').value || currentMonthStr();
+      const qVentas = query(collection(db, 'ventas'), where('mesAnio', '==', mes));
+      const snapVentas = await getDocs(qVentas);
+
+      let totalVentasMes = 0;
+      let detEfectivo = 0, detQr = 0, detCoop = 0, detBanco = 0, detCredito = 0;
+
+      snapVentas.forEach(d => {
+        const v = d.data();
+        const t = Number(v.total || 0);
+        totalVentasMes += t;
+        if (v.metodoPago === 'Efectivo') detEfectivo += t;
+        else if (v.metodoPago === 'QR Débito/Crédito') detQr += t;
+        else if (v.metodoPago === 'Transferencia Cooperativa') detCoop += t;
+        else if (v.metodoPago === 'Transferencia Bancaria') detBanco += t;
+        else if (v.metodoPago === 'Crédito') detCredito += t;
+      });
+
+      const qCompras = query(collection(db, 'compras_proveedores'), where('mesAnio', '==', mes));
+      const snapCompras = await getDocs(qCompras);
+      let totalComprasIva = 0;
+      snapCompras.forEach(d => {
+        const c = d.data();
+        if (c.conIva) totalComprasIva += Number(c.montoTotal || 0);
+      });
+
+      // En Paraguay (IVA 10% incluido): IVA = Monto / 11
+      const ivaDebito = Math.round(totalVentasMes / 11);
+      const ivaCredito = Math.round(totalComprasIva / 11);
+      const saldoIva = ivaDebito - ivaCredito;
+
+      // Cuota DBN = 10% de todas las ventas totales del mes
+      const cuotaDbn = Math.round(totalVentasMes * 0.10);
+
+      document.getElementById('iva-ventas-brutas').textContent = gs(totalVentasMes);
+      document.getElementById('iva-debito').textContent = gs(ivaDebito);
+      document.getElementById('iva-compras-brutas').textContent = gs(totalComprasIva);
+      document.getElementById('iva-credito').textContent = gs(ivaCredito);
+
+      const ivaEl = document.getElementById('iva-a-pagar');
+      const noteEl = document.getElementById('iva-status-note');
+      if (saldoIva >= 0) {
+        ivaEl.textContent = gs(saldoIva);
+        ivaEl.className = 'text-3xl font-black text-terracota mt-1 block';
+        noteEl.textContent = 'Saldo de IVA Débito a abonar al fisco en el período.';
+      } else {
+        ivaEl.textContent = `0 Gs. (A favor: ${gs(Math.abs(saldoIva))})`;
+        ivaEl.className = 'text-2xl font-black text-emerald-700 mt-1 block';
+        noteEl.textContent = 'El IVA Crédito Fiscal de compras supera al Débito Fiscal del mes.';
+      }
+
+      document.getElementById('dbn-cuota-monto').textContent = gs(cuotaDbn);
+      document.getElementById('dbn-det-efectivo').textContent = gs(detEfectivo);
+      document.getElementById('dbn-det-qr').textContent = gs(detQr);
+      document.getElementById('dbn-det-coop').textContent = gs(detCoop);
+      document.getElementById('dbn-det-banco').textContent = gs(detBanco);
+      document.getElementById('dbn-det-credito').textContent = gs(detCredito);
+
+      lastIvaSummary = {
+        mes,
+        totalVentasMes,
+        ivaDebito,
+        totalComprasIva,
+        ivaCredito,
+        ivaAPagar: Math.max(0, saldoIva),
+        ivaAFavor: saldoIva < 0 ? Math.abs(saldoIva) : 0,
+        cuotaDbn,
+        detEfectivo,
+        detQr,
+        detCoop,
+        detBanco,
+        detCredito
+      };
+    }
+    document.getElementById('iva-month').addEventListener('change', loadIvaAndDbn);
+
+    document.getElementById('btn-export-iva-dbn').addEventListener('click', () => {
+      if (!lastIvaSummary.mes) return;
+      const s = lastIvaSummary;
+      const rows = [
+        { 'Concepto': 'Mes Liquidado', 'Monto (Gs.)': s.mes },
+        { 'Concepto': 'Ventas Totales del Mes (IVA 10% Inc.)', 'Monto (Gs.)': s.totalVentasMes },
+        { 'Concepto': 'IVA Débito Fiscal (Ventas / 11)', 'Monto (Gs.)': s.ivaDebito },
+        { 'Concepto': 'Compras Gravadas con Factura IVA 10%', 'Monto (Gs.)': s.totalComprasIva },
+        { 'Concepto': 'IVA Crédito Fiscal (Compras / 11)', 'Monto (Gs.)': s.ivaCredito },
+        { 'Concepto': 'Saldo IVA a Pagar', 'Monto (Gs.)': s.ivaAPagar },
+        { 'Concepto': 'Saldo IVA a Favor', 'Monto (Gs.)': s.ivaAFavor },
+        { 'Concepto': 'CUOTA DBN (10% sobre Ventas Totales del Mes)', 'Monto (Gs.)': s.cuotaDbn }
+      ];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'IVA_y_Cuota_DBN');
+      XLSX.writeFile(wb, `DeliciApp_IVA_DBN_${s.mes}.xlsx`);
+    });
+
+    // 6. RANKING Y REPORTES
     async function loadReportes() {
       const fecha = document.getElementById('rep-date').value || todayStr();
       const q = query(collection(db, 'ventas'), where('fecha', '==', fecha));
